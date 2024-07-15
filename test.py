@@ -1,13 +1,12 @@
-from comet_ml import Experiment
 import numpy as np
 import torch
+from comet_ml import Experiment
 from metrics import Metrics
 from DataPreprocessing import DataPreprocessing, visual_inspect
 import os
 import datetime
 
 def test_model(model, device, test_loader, test_names, test_idxs, model_name, experiment=None):
-    # Set model to evaluation mode
     model.eval()
     iou_scores = []
     dice_scores = []
@@ -19,7 +18,7 @@ def test_model(model, device, test_loader, test_names, test_idxs, model_name, ex
     os.makedirs(save_dir, exist_ok=True)
 
     with torch.no_grad():
-        for idx, (images, masks, original_shapes) in enumerate(test_loader):
+        for idx, (images, masks, original_shapes, paddings) in enumerate(test_loader):
             images, masks = images.to(device), masks.to(device)
             outputs = model(images)
             preds = torch.sigmoid(outputs)
@@ -28,15 +27,10 @@ def test_model(model, device, test_loader, test_names, test_idxs, model_name, ex
                 pred = preds[i]
                 mask = masks[i]
                 original_shape = original_shapes[i]
+                padding = paddings[i]
 
-                # Ensure original_shape is a tuple of integers
-                if isinstance(original_shape, torch.Tensor):
-                    original_shape = tuple(original_shape.cpu().numpy())
-                else:
-                    original_shape = tuple(original_shape)
-
-                pred_resized = DataPreprocessing.unpad_and_resize(pred, original_shape)
-                mask_resized = DataPreprocessing.unpad_and_resize(mask, original_shape)
+                pred_resized = DataPreprocessing.unpad_and_resize(pred, original_shape, padding)
+                mask_resized = DataPreprocessing.unpad_and_resize(mask, original_shape, padding)
 
                 # Compute metrics
                 iou_scores.append(Metrics.mean_iou(pred_resized, mask_resized))
@@ -49,8 +43,7 @@ def test_model(model, device, test_loader, test_names, test_idxs, model_name, ex
 
                 # Save overlay images
                 original_image = images[i].cpu()
-                visual_inspect(original_image, pred_resized, save_path=os.path.join(save_dir, f"pred_{image_idx}_{image_name}"))
-                visual_inspect(original_image, mask_resized, save_path=os.path.join(save_dir, f"gt_{image_idx}_{image_name}"))
+                visual_inspect(original_image, mask_resized, pred_tensor=pred_resized, save_path=os.path.join(save_dir, f"combined_{image_name}_{image_idx}.png"))
 
     mean_iou_score = np.mean(iou_scores)
     mean_dice_score = np.mean(dice_scores)

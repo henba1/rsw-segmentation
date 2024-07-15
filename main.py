@@ -16,7 +16,7 @@ from SegFormer import SegFormer
 
 def main():
 
-    with open('config.json', 'r') as f:
+    with open('../config.json', 'r') as f:
         config = json.load(f)
 
     experiment = Experiment(
@@ -50,6 +50,7 @@ def main():
     experiment.log_asset('../train_val_data.csv')
     experiment.log_asset('../test_data.csv')
 
+    # Shuffle the data to avoid overfitting to the order of the data (we have two distinct datasets)
     combined_data = list(zip(trainval, trainval_names, trainval_labelmasks, trainval_idxs))
     random.shuffle(combined_data)
     trainval, trainval_names, trainval_labelmasks, trainval_idxs = zip(*combined_data)
@@ -77,6 +78,7 @@ def main():
     elif config["model_type"] == "segformer":
         model = SegFormer(num_labels=1)
     
+    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     
@@ -91,19 +93,21 @@ def main():
         "augment_factor": config["augment_factor"],
         "num_epochs": config["num_epochs"]
     })
-    
-    # 5 Training loop
-    train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=20, experiment=experiment)
 
     if config["loadModel"]:
-        # Initialize and load model
         model, epoch = load_model(model)
         print(f"Model loaded from epoch {epoch}")
+    else:
+        # 5 Training 
+        train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=20, experiment=experiment)
     
     # 6 Test model
-    test_model(model, device, test_batch_generator, experiment=experiment)
+    model_type = type(model).__name__
+    test_model(model, device, test_batch_generator, test_names=test_names, test_idxs=test_idxs, model_name=model_type, experiment=experiment)
 
-    # train_val splits for later 
+
+
+    # train_val splits for later (see code on cluster) 
 
 if __name__ == "__main__":
     main()

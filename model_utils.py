@@ -31,7 +31,8 @@ def load_model(model, directory="../models"):
     load_path = os.path.join(directory, f"{model_type}.pt")
     if not os.path.exists(load_path):
         raise FileNotFoundError(f"No saved model found at {load_path}")
-
+    else:
+        print(f"Loading model {model_type} from {load_path}")
     checkpoint = torch.load(load_path)
     model.load_state_dict(checkpoint['model_state_dict'])
     epoch = checkpoint['epoch']

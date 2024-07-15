@@ -1,5 +1,5 @@
 from transformers import SegformerForSemanticSegmentation, SegformerFeatureExtractor
-import torch
+import torch.nn as nn
 
 class SegFormer(nn.Module):
     def __init__(self, num_labels=1):

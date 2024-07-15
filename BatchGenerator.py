@@ -16,10 +16,11 @@ class BatchGenerator:
         batch_images = []
         batch_masks = []
         batch_shapes = []
+        batch_paddings = []
 
         for idx in range(len(self.dataset)):
             for _ in range(self.augment_factor):
-                image, mask, original_shape = self.dataset[idx]
+                image, mask, original_shape, padding = self.dataset[idx]
 
                 if self.augmentations:
                     image, mask = apply_transforms(image, mask, self.augmentations)
@@ -27,12 +28,14 @@ class BatchGenerator:
                 batch_images.append(image)
                 batch_masks.append(mask)
                 batch_shapes.append(original_shape)
+                batch_paddings.append(padding)
 
                 if len(batch_images) == self.batch_size:
-                    yield torch.stack(batch_images), torch.stack(batch_masks), batch_shapes
+                    yield torch.stack(batch_images), torch.stack(batch_masks), batch_shapes, batch_paddings
                     batch_images = []
                     batch_masks = []
                     batch_shapes = []
+                    batch_paddings = []
 
         if batch_images:
             yield torch.stack(batch_images), torch.stack(batch_masks), batch_shapes
