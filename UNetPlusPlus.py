@@ -1,20 +1,20 @@
 import segmentation_models_pytorch as smp
 import torch.nn as nn
 
-class UNet(nn.Module):
+class UNetPlusPlus(nn.Module):
     def __init__(self, in_channels=1, out_channels=1, encoder_name="resnet34", use_pretrained=True):
-        super(UNet, self).__init__()
+        super(UNetPlusPlus, self).__init__()
         encoder_weights = "imagenet" if use_pretrained else None
-        self.model = smp.Unet(
+        self.model = smp.UnetPlusPlus(
             encoder_name=encoder_name,
             encoder_weights=encoder_weights,
             in_channels=in_channels,
             classes=out_channels,
         )
-    
+
     def forward(self, x):
         return self.model(x)
-    
+
     def parameters(self):
         return self.model.parameters()
     
@@ -32,7 +32,3 @@ class UNet(nn.Module):
     
     def train(self):
         self.model.train()
-
-# Example usage
-model = UNet(in_channels=1, out_channels=1)
-print(model)

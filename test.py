@@ -7,6 +7,7 @@ import os
 import datetime
 
 def test_model(model, device, test_loader, test_names, test_idxs, model_name, experiment=None):
+    # Set model to evaluation mode
     model.eval()
     iou_scores = []
     dice_scores = []

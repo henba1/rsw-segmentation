@@ -5,12 +5,15 @@ import torch.optim as optim
 import torch.nn as nn
 import time
 from metrics import Metrics
+from model_utils import save_model
 
-def train_model(model, device, train_loader, val_loader=None, num_epochs=1, lr=1e-4, experiment=None):
+def train_model(model, device, train_loader, val_loader=None, num_epochs=1, lr=1e-4, checkpoint_batch=50, experiment=None):
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.BCELoss()
 
     print(f"Using device: {device}")
+
+    total_batches = 0
 
     for epoch in range(num_epochs):
         model.train()
@@ -22,6 +25,7 @@ def train_model(model, device, train_loader, val_loader=None, num_epochs=1, lr=1
         train_accuracies = []
 
         for batch_idx, batch_data in enumerate(train_loader):
+            total_batches += 1
             batch_start_time = time.time()
 
             if len(batch_data) == 3:
@@ -52,6 +56,10 @@ def train_model(model, device, train_loader, val_loader=None, num_epochs=1, lr=1
                 experiment.log_metric("batch_train_dice", train_dice_scores[-1], step=epoch * len(train_loader) + batch_idx)
                 experiment.log_metric("batch_train_accuracy", train_accuracies[-1], step=epoch * len(train_loader) + batch_idx)
 
+            # Save model after every checkpoint_batch amount of batches
+            if total_batches > 0 and total_batches % checkpoint_batch == 0:
+                save_model(model, epoch, directory="../models")
+
         epoch_train_iou = np.mean(train_iou_scores)
         epoch_train_dice = np.mean(train_dice_scores)
         epoch_train_accuracy = np.mean(train_accuracies)
@@ -64,6 +72,9 @@ def train_model(model, device, train_loader, val_loader=None, num_epochs=1, lr=1
             experiment.log_metric("epoch_train_iou", epoch_train_iou, step=epoch)
             experiment.log_metric("epoch_train_dice", epoch_train_dice, step=epoch)
             experiment.log_metric("epoch_train_accuracy", epoch_train_accuracy, step=epoch)
+
+        # Save model after every epoch
+        save_model(model, epoch, directory="../models")
 
         # Validation loop
         if val_loader:
