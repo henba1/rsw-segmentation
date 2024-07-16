@@ -90,7 +90,7 @@ def points_to_coordinates(points):
     coordinates = np.array(points).reshape(-1, 2)
     return coordinates
 
-def visual_inspect(image_tensor, mask_tensor, pred_tensor=None, save_path=None):
+def visual_inspect(image_tensor, mask_tensor, pred_tensor=None, save_path=None, original_shape=None):
     def overlay_mask_on_image(image, mask, pred=None, save_path=None):
         fig, axes = plt.subplots(1, 3, figsize=(30, 10))  # 1 row, 3 columns
         axes[0].imshow(image, cmap='gray')
@@ -116,8 +116,18 @@ def visual_inspect(image_tensor, mask_tensor, pred_tensor=None, save_path=None):
         else:
             plt.show()
 
+    # Convert tensors to numpy arrays and adjust intensity range
     image_np = image_tensor.squeeze().numpy() * 0.5 + 0.5
     mask_np = mask_tensor.squeeze().numpy()
     pred_np = pred_tensor.squeeze().numpy() if pred_tensor is not None else None
 
+    # If original_shape is provided, crop images to original shape
+    if original_shape:
+        width = original_shape[2]
+        image_np = image_np[:, :width]
+        mask_np = mask_np[:, :width]
+        if pred_np is not None:
+            pred_np = pred_np[:, :width]
+
     overlay_mask_on_image(image_np, mask_np, pred=pred_np, save_path=save_path)
+

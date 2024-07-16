@@ -25,9 +25,9 @@ def main():
         project_name=config["project_name"],
         workspace=config["workspace"],
     )
-
+ 
     # 1 Prepare data
-    prepare_data = PrepareData(dataset=config["dataset"], n_splits=config["n_splits"], random_state=config["random_state"])
+    prepare_data = PrepareData(dataset=config["dataset"], n_splits=config["n_splits"], random_state=config["random_state"], local=config["local"])
     trainval, trainval_names, trainval_labelmasks, trainval_idxs, test, test_names, test_labelmasks, test_idxs, data_list, dfs_img_has_mask, df_trainval, df_test, folds = (
         prepare_data.trainval,
         prepare_data.trainval_names,

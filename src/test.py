@@ -23,6 +23,8 @@ def test_model(model, device, test_loader, test_names, test_idxs, model_name, ex
             outputs = model(images)
             preds = torch.sigmoid(outputs)
 
+            original_image_shape = images[0].cpu().numpy().shape
+
             for i in range(len(preds)):
                 pred = preds[i]
                 mask = masks[i]
@@ -43,7 +45,7 @@ def test_model(model, device, test_loader, test_names, test_idxs, model_name, ex
 
                 # Save overlay images
                 original_image = images[i].cpu()
-                visual_inspect(original_image, mask_resized, pred_tensor=pred_resized, save_path=os.path.join(save_dir, f"combined_{image_name}_{image_idx}.png"))
+                visual_inspect(original_image, mask_resized, pred_tensor=pred_resized, save_path=os.path.join(save_dir, f"combined_{image_name}_{image_idx}.png"),original_shape=original_image_shape)
 
     mean_iou_score = np.mean(iou_scores)
     mean_dice_score = np.mean(dice_scores)
