@@ -1,5 +1,5 @@
+import os
 import numpy as np
-import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.transforms.functional import to_pil_image, to_tensor
@@ -7,8 +7,9 @@ from PIL import Image
 from skimage.draw import polygon
 import matplotlib.pyplot as plt
 
-class DataPreprocessing(Dataset):
-    def __init__(self, images, mask_points, target_size=(512, 512), resize_transform=None):
+
+class DataProcessing(Dataset):
+    def __init__(self, images, mask_points, original_size, target_size=(512, 512), resize_transform=None):
         """
         Args:
         - images (list): List of image arrays.
@@ -18,6 +19,7 @@ class DataPreprocessing(Dataset):
         """
         self.images = images
         self.mask_points = mask_points
+        self.original_size = original_size
         self.target_size = target_size
         self.resize_transform = resize_transform if resize_transform else transforms.Resize(target_size)
 
@@ -25,14 +27,19 @@ class DataPreprocessing(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
+        original_image = self.images[idx]
         image, padding = normalize_and_pad_image(self.images[idx], self.target_size, self.resize_transform)
         coordinates = points_to_coordinates(self.mask_points[idx])
         mask, _ = create_and_pad_mask(self.images[idx].shape, coordinates, self.target_size, self.resize_transform)
-        return image, mask, self.images[idx].shape, padding  # Return padding information
+        # print('=================')
+        # print(self.images[idx].shape)
+        # print(self.original_size[idx])
+    
+        return original_image, image, mask, self.original_size[idx], padding  # Return padding information
 
     @staticmethod
     def unpad_and_resize(tensor, original_shape, padding):
-        height, width = original_shape[:2]
+        height, width = original_shape
         image_pil = to_pil_image(tensor)
         unpadded_image = transforms.functional.crop(image_pil, 0, 0, height, width)  # Remove padding
         resized_image = transforms.Resize((height, width))(unpadded_image)  # Resize image to original size
@@ -90,44 +97,47 @@ def points_to_coordinates(points):
     coordinates = np.array(points).reshape(-1, 2)
     return coordinates
 
-def visual_inspect(image_tensor, mask_tensor, pred_tensor=None, save_path=None, original_shape=None):
-    def overlay_mask_on_image(image, mask, pred=None, save_path=None):
-        fig, axes = plt.subplots(1, 3, figsize=(30, 10))  # 1 row, 3 columns
-        axes[0].imshow(image, cmap='gray')
-        axes[0].imshow(mask, cmap='jet', alpha=0.4)
-        axes[0].set_title("Ground Truth Overlay")
-        axes[0].axis('off')
 
-        if pred is not None:
-            axes[1].imshow(image, cmap='gray')
-            axes[1].imshow(pred, cmap='jet', alpha=0.4)
-            axes[1].set_title("Prediction Overlay")
-            axes[1].axis('off')
-            
-            axes[2].imshow(image, cmap='gray')
-            axes[2].imshow(mask, cmap='jet', alpha=0.4)
-            axes[2].imshow(pred, cmap='jet', alpha=0.4)
-            axes[2].set_title("Ground Truth and Prediction Overlay")
-            axes[2].axis('off')
-
-        if save_path:
-            plt.savefig(save_path)
-            plt.close()
-        else:
-            plt.show()
+def visual_inspect(original_image, mask_tensor, pred_tensor=None, save_path=None, original_shape=None, bin_thresh=0.5):
+    def save_image(save_dir, filename):
+        plt.axis('off')
+        plt.savefig(os.path.join(save_dir, filename), bbox_inches='tight', pad_inches=0)
+        plt.close()
 
     # Convert tensors to numpy arrays and adjust intensity range
-    image_np = image_tensor.squeeze().numpy() * 0.5 + 0.5
     mask_np = mask_tensor.squeeze().numpy()
     pred_np = pred_tensor.squeeze().numpy() if pred_tensor is not None else None
 
-    # If original_shape is provided, crop images to original shape
-    if original_shape:
-        width = original_shape[2]
-        image_np = image_np[:, :width]
-        mask_np = mask_np[:, :width]
-        if pred_np is not None:
-            pred_np = pred_np[:, :width]
+    if save_path:
+        os.makedirs(save_path, exist_ok=True)
+        
+        # Initial Image
+        plt.imshow(original_image, cmap='gray')
+        save_image(save_path, "initial_image.png")
 
-    overlay_mask_on_image(image_np, mask_np, pred=pred_np, save_path=save_path)
+        # Ground Truth Overlay
+        plt.imshow(original_image, cmap='gray')
+        plt.imshow(mask_np, cmap='jet', alpha=0.4)
+        save_image(save_path, "ground_truth_overlay.png")
+
+        if pred_np is not None:
+            # Prediction Overlay
+            plt.imshow(original_image, cmap='gray')
+            plt.imshow(pred_np, cmap='jet', alpha=0.4)
+            save_image(save_path, "prediction_overlay.png")
+
+            # Ground Truth and Prediction Overlay
+            plt.imshow(original_image, cmap='gray')
+            plt.imshow(mask_np, cmap='jet', alpha=0.4)
+            plt.imshow(pred_np, cmap='jet', alpha=0.4)
+            save_image(save_path, "gt_pred_overlay.png")
+
+            # Binarized Prediction
+            binarized_pred = (pred_np > bin_thresh).astype(np.float32)
+            plt.imshow(original_image, cmap='gray')
+            plt.imshow(binarized_pred, cmap='jet', alpha=0.5)
+            save_image(save_path, f"binarized_prediction_thresh={bin_thresh}.png")
+    else: 
+        print("visual_inspect: Please provide a save_path to save the image.")
+        return
 

@@ -13,6 +13,7 @@ class BatchGenerator:
         return len(self.dataset) * self.augment_factor
 
     def __iter__(self):
+        batch_original_images = []
         batch_images = []
         batch_masks = []
         batch_shapes = []
@@ -20,25 +21,29 @@ class BatchGenerator:
 
         for idx in range(len(self.dataset)):
             for _ in range(self.augment_factor):
-                image, mask, original_shape, padding = self.dataset[idx]
-
-                if self.augmentations:
-                    image, mask = apply_transforms(image, mask, self.augmentations)
-
-                batch_images.append(image)
-                batch_masks.append(mask)
+                original_image, image, mask, original_shape, padding = self.dataset[idx]
+                
+                batch_original_images.append(original_image)
                 batch_shapes.append(original_shape)
                 batch_paddings.append(padding)
 
+                if self.augmentations:
+                    image, mask = apply_transforms(image, mask, self.augmentations)
+                
+                batch_images.append(image)
+                batch_masks.append(mask)
+
+
                 if len(batch_images) == self.batch_size:
-                    yield torch.stack(batch_images), torch.stack(batch_masks), batch_shapes, batch_paddings
+                    yield batch_original_images, torch.stack(batch_images), torch.stack(batch_masks), batch_shapes, batch_paddings
+                    batch_original_images = []
                     batch_images = []
                     batch_masks = []
                     batch_shapes = []
                     batch_paddings = []
 
         if batch_images:
-            yield torch.stack(batch_images), torch.stack(batch_masks), batch_shapes
+            yield batch_original_images, torch.stack(batch_images), torch.stack(batch_masks), batch_shapes, batch_paddings
 
     @staticmethod
     def find_optimal_batch_size(model, device, dataset, starting_batch_size=8, increment=8, max_memory_usage=0.9):

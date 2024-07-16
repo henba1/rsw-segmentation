@@ -1,9 +1,12 @@
-{
+{   
+
+    "npy_path": "R:\\R__Projects\\SSQC_experiments\\rsw_1\\rsw_project\\data",
     "local": true,
     "n_splits": 6,
     "random_state": 50,
     "train_batch_size": 8,
     "test_batch_size": 8,
+    "bin_thresh": 0.35,
     "rotation_deg": 20,
     "translation": 0.1,
     "model_type": "unet",
@@ -13,7 +16,7 @@
     "loadModel": true,
     "num_epochs": 1,
     "augment_factor": 2,
-    "dataset": "both",
-    "project_name": "ssqc-rsw-1-local",
+    "dataset": "EUR",
+    "project_name": "ssqc-rsw-",
     "workspace": "simon-onyx"
 }

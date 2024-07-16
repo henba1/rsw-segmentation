@@ -1,35 +1,58 @@
 import os
+import sys
+import glob
 import pandas as pd
 import numpy as np
-import glob
-from sklearn.model_selection import StratifiedKFold, train_test_split
 import matplotlib.pyplot as plt
+from sklearn.model_selection import StratifiedKFold, train_test_split
+from skimage import color
+
 
 class PrepareData:
-    def __init__(self, dataset='EUR', random_state=42, n_splits=10, local=False):
+    def __init__(self, dataset='EUR', random_state=42, n_splits=10, local=False, npy_path=None):
         self.dataset = dataset
         self.random_state = random_state
         self.n_splits = n_splits
         self.local = local
+        self.path = npy_path
         self.data_list = self.load_data()
         self.dfs_img_has_mask = self.get_data_distribution()
         self.df_train_val, self.df_test, self.folds = self.divide_data()
         self.save_dataframes()
-        self.trainval, self.trainval_names, self.trainval_labelmasks, self.trainval_idxs, self.test, self.test_names, self.test_labelmasks, self.test_idxs = self.build_dataset()
+        self.trainval, self.trainval_names, self.trainval_labelmasks, self.trainval_idxs, self.trainval_dims, self.test, self.test_names, self.test_labelmasks, self.test_idxs, self.test_dims = self.build_dataset()
         #self.print_fold_indices()
         
     def load_data(self):
-        if not self.local:
-            base_path = '../data/'
-        else:
-            base_path = 'C:\\Users\Hendrik\\iCloudDrive\\Desktop\\WZL\\ssqc\\rsw_research\\code_data\\archive\\'
-        
+        if self.path is None:
+            print("No path to the .npy files in which the dataset is stored is provided.")
+            print("Please provide the path to the .npy files in the config.json file.")
+
         if self.dataset == 'EUR':
-            npy_files = glob.glob(os.path.join(base_path, "all_images_data_eur.npy"))
+            try:
+                npy_files = glob.glob(os.path.join(self.path, "all_images_data_eur.npy"))
+            except TypeError:
+                print("Error: No .npy files found in the directory: {self.path}")
+                print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
+                sys.exit(1)
+        
         elif self.dataset == 'lab':
-            npy_files = glob.glob(os.path.join(base_path, "all_images_data_lab.npy"))
+            try:
+                npy_files = glob.glob(os.path.join(self.path, "all_images_data_lab.npy"))
+            except TypeError:
+                print("Error: No .npy files found in the directory: {self.path}")
+                print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
+                sys.exit(1)
         else:
-            npy_files = glob.glob(os.path.join(base_path, "*.npy"))
+            try:
+                npy_files = glob.glob(os.path.join(self.path, "*.npy"))
+            except TypeError:
+                print("Error: No .npy files found in the directory: {self.path}")
+                print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
+                sys.exit(1)
+        if not npy_files:
+            print(f"Error: No .npy files found in the directory: {self.path}")
+            print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
+            sys.exit(1)
 
         # Sort the file names alphabetically to keep the expected order of the datasets
         npy_files = sorted(npy_files, key=lambda x: x.lower())
@@ -44,12 +67,12 @@ class PrepareData:
     def get_data_distribution(self):
         dfs = []
         for img_data in self.data_list:
-            df_img_has_mask = self._get_data_distribution_for_img_data(img_data)
+            df_img_has_mask = self.get_data_distribution_for_img_data(img_data)
             dfs.append(df_img_has_mask)
         dfs_img_has_mask = pd.concat(dfs, ignore_index=True)
         return dfs_img_has_mask
 
-    def _get_data_distribution_for_img_data(self, img_data):
+    def get_data_distribution_for_img_data(self, img_data):
         token = 0
         df_img_has_mask = pd.DataFrame(columns=['image_idx', 'dataset_idx', 'has_mask', 'dataset'])
         df_img_has_mask["has_mask"] = df_img_has_mask["has_mask"].astype(bool)
@@ -106,11 +129,13 @@ class PrepareData:
         img_names_global = []
         img_masks_global = []
         img_idx_global = []
+        img_dims_global = []
 
         img_list_test_global = []
         img_names_test_global = []
         img_masks_test_global = []
         img_idx_test_global = []
+        img_dims_test_global = []
 
         train_val_grouped = self.df_train_val['dataset'].str.split('_').str[0]
         test_grouped = self.df_test['dataset'].str.split('_').str[0]
@@ -124,24 +149,38 @@ class PrepareData:
                 img_list = [dataset[num_set][ind][0] for ind in train_idxs]
                 img_names = [dataset[num_set][ind][2] for ind in train_idxs]
                 img_masks = [dataset[num_set][ind][5] for ind in train_idxs]
+                img_dims = [dataset[num_set][ind][8] for ind in train_idxs]
 
                 img_list_test = [dataset[num_set][ind][0] for ind in test_idxs]
                 img_names_test = [dataset[num_set][ind][2] for ind in test_idxs]
                 img_masks_test = [dataset[num_set][ind][5] for ind in test_idxs]
+                img_dims_test = [dataset[num_set][ind][8] for ind in test_idxs]
 
                 img_list_global.extend(img_list)
                 img_names_global.extend(img_names)
                 img_masks_global.extend(img_masks)
                 img_idx_global.extend([(ind, num_set) for ind in train_idxs])
+                img_dims_global.extend(img_dims)
 
                 img_list_test_global.extend(img_list_test)
                 img_names_test_global.extend(img_names_test)
                 img_masks_test_global.extend(img_masks_test)
                 img_idx_test_global.extend([(ind, num_set) for ind in test_idxs])
+                img_dims_test_global.extend(img_dims_test)
 
-        return img_list_global, img_names_global, img_masks_global, img_idx_global, img_list_test_global, img_names_test_global, img_masks_test_global, img_idx_test_global
 
-    def display_img(self, img_data, dataset_idx, target_filename, show_annot_mask=1, color_space='gray', figsize=(16, 10)):
+        return img_list_global, img_names_global, img_masks_global, img_idx_global, img_dims_global, img_list_test_global, img_names_test_global, img_masks_test_global, img_idx_test_global, img_dims_test_global
+
+    def display_img(img_data, dataset_idx, target_filename, show_annot_mask=1, color_space='gray', figsize=(16, 10)):
+        """
+        Displays an image from the dataset with the given filename, dataset index, and color space.
+        :param img_data: The image data to display.
+        :param dataset_idx: The index of the dataset to display the image from.
+        :param target_filename: The filename of the image to display.
+        :param show_annot_mask: Whether to show the annotated mask or not.
+        :param color_space: The color space to display the image in.
+        :param figsize: The size of the figure to display.
+        """
         def find_image_idx(img_data, dataset_idx, target_filename):
             for image_idx, image_info in enumerate(img_data[dataset_idx]):
                 if image_info[2] == target_filename:
@@ -150,22 +189,24 @@ class PrepareData:
         
         def plot_img(img_data, dataset_idx, image_idx, show_annot_mask, color_space, figsize):
             plt.figure(figsize=figsize)
+            image = img_data[dataset_idx][image_idx][show_annot_mask]
             if color_space == 'gray' or color_space == 'grey':
-                plt.imshow(img_data[dataset_idx][image_idx][show_annot_mask], cmap='gray')
+                plt.imshow(image, cmap='gray')
             elif color_space == 'rgb' and show_annot_mask == 1:
-                plt.imshow(cv2.cvtColor(img_data[dataset_idx][image_idx][show_annot_mask], cv2.COLOR_LAB2RGB))
+                image_rgb = color.lab2rgb(image)
+                plt.imshow(image_rgb)
 
             plt.axis('off')
             dataset = img_data[dataset_idx][image_idx][4].split('/')[-1]
             plt.title(f"{img_data[dataset_idx][image_idx][2]}, {dataset}, Image {image_idx}, Color Space: {color_space}")
             plt.show()
-        
-        image_idx = find_image_idx(img_data, dataset_idx, target_filename)
 
-        if image_idx is None:
+        # Find the image index
+        image_idx = find_image_idx(img_data, dataset_idx, target_filename)
+        if image_idx is not None:
+            plot_img(img_data, dataset_idx, image_idx, show_annot_mask, color_space, figsize)
+        else:
             print(f"Image {target_filename} not found in dataset {dataset_idx}")
-            return None
-        plot_img(img_data, dataset_idx, image_idx, show_annot_mask, color_space, figsize)
         
         return image_idx
     

@@ -4,7 +4,7 @@ from comet_ml import Experiment
 import torch
 from torchvision import transforms
 from PrepareData import PrepareData
-from DataPreprocessing import DataPreprocessing
+from DataProcessing import DataProcessing
 from BatchGenerator import BatchGenerator
 from train import train_model
 from test import test_model
@@ -16,27 +16,30 @@ from SegFormer import SegFormer
 
 
 def main():
-
     with open('../config.json', 'r') as f:
         config = json.load(f)
+    
+    npy_path = config.get("npy_path", None)
 
     experiment = Experiment(
         api_key="GeoZOdwTSNAEqugIyovCVq2Kv",
-        project_name=config["project_name"],
+        project_name=f"{config['project_name']}{config['model_type']}",
         workspace=config["workspace"],
     )
  
     # 1 Prepare data
-    prepare_data = PrepareData(dataset=config["dataset"], n_splits=config["n_splits"], random_state=config["random_state"], local=config["local"])
-    trainval, trainval_names, trainval_labelmasks, trainval_idxs, test, test_names, test_labelmasks, test_idxs, data_list, dfs_img_has_mask, df_trainval, df_test, folds = (
+    prepare_data = PrepareData(dataset=config["dataset"], n_splits=config["n_splits"], random_state=config["random_state"], local=config["local"], npy_path=npy_path)
+    trainval, trainval_names, trainval_labelmasks, trainval_idxs, trainval_dims, test, test_names, test_labelmasks, test_idxs, test_dims, data_list, dfs_img_has_mask, df_trainval, df_test, folds = (
         prepare_data.trainval,
         prepare_data.trainval_names,
         prepare_data.trainval_labelmasks,
         prepare_data.trainval_idxs,
+        prepare_data.trainval_dims,
         prepare_data.test,
         prepare_data.test_names,
         prepare_data.test_labelmasks,
         prepare_data.test_idxs,
+        prepare_data.test_dims,
         prepare_data.data_list,
         prepare_data.dfs_img_has_mask,
         prepare_data.df_train_val,
@@ -52,14 +55,19 @@ def main():
     experiment.log_asset('../test_data.csv')
 
     # Shuffle the data to avoid overfitting to the order of the data (we have two distinct datasets)
-    combined_data = list(zip(trainval, trainval_names, trainval_labelmasks, trainval_idxs))
+    combined_data = list(zip(trainval, trainval_names, trainval_labelmasks, trainval_idxs, trainval_dims))
     random.shuffle(combined_data)
-    trainval, trainval_names, trainval_labelmasks, trainval_idxs = zip(*combined_data)
+    trainval, trainval_names, trainval_labelmasks, trainval_idxs, trainval_dims = zip(*combined_data)
+    
+    # also shuffle the test data (for visual inspection purposes) -> can remove that later
+    combined_data = list(zip(test, test_names, test_labelmasks, test_idxs, test_dims))
+    random.shuffle(combined_data)
+    test, test_names, test_labelmasks, test_idxs, test_dims = zip(*combined_data)
 
     # 2 Preprocess the data
     custom_resize_transform = transforms.Resize((512, 512))
-    train_dataset = DataPreprocessing(trainval, trainval_labelmasks, resize_transform=custom_resize_transform)
-    test_dataset = DataPreprocessing(test, test_labelmasks, resize_transform=custom_resize_transform)
+    train_dataset = DataProcessing(trainval, trainval_labelmasks, trainval_dims, resize_transform=custom_resize_transform)
+    test_dataset = DataProcessing(test, test_labelmasks, test_dims, resize_transform=custom_resize_transform)
 
     data_augmentation_transforms = transforms.Compose([
         transforms.RandomAffine(degrees=config["rotation_deg"], translate=(config["translation"], config["translation"]))
@@ -109,7 +117,7 @@ def main():
     
     # 6 Test model
     model_type = type(model).__name__
-    test_model(model, device, test_batch_generator, test_names=test_names, test_idxs=test_idxs, model_name=model_type, experiment=experiment)
+    test_model(model, device, test_batch_generator, test_names=test_names, test_idxs=test_idxs, test_dims=test_dims, model_name=model_type, bin_thresh=config['bin_thresh'], experiment=experiment)
 
 
     # train_val splits for later (see code on cluster) 
