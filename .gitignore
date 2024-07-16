@@ -7,3 +7,4 @@ preds*/*
 test_data.csv
 train_val_data.csv
 *.txt
+*.npy
