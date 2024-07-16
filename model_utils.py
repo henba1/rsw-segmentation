@@ -1,6 +1,6 @@
 import os
 import torch
-import datetime
+from torchviz import make_dot
 
 def save_model(model, epoch, directory="../models"):
     """
@@ -38,3 +38,26 @@ def load_model(model, directory="../models"):
     epoch = checkpoint['epoch']
     print(f"Model loaded from {load_path} (epoch {epoch})")
     return model, epoch
+
+def save_model_visualization(model, model_name, input_tensor, directory="../models"):
+    """
+    Save the model architecture visualization.
+    
+    Args:
+    - model (torch.nn.Module): The model to visualize.
+    - model_name (str): The name of the model.
+    - input_tensor (torch.Tensor): A dummy input tensor to pass through the model for visualization.
+    - directory (str): Directory to save the visualization.
+    """
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    # Generate the visualization
+    y = model(input_tensor)
+    dot = make_dot(y, params=dict(model.named_parameters()))
+
+    # Save the visualization
+    save_path = os.path.join(directory, f"{model_name}_architecture")
+    dot.format = 'png'
+    dot.render(save_path)
+    print(f"Model architecture visualization saved to {save_path}.png")

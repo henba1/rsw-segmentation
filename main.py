@@ -8,11 +8,12 @@ from DataPreprocessing import DataPreprocessing
 from BatchGenerator import BatchGenerator
 from train import train_model
 from test import test_model
-from model_utils import load_model
+from model_utils import load_model, save_model_visualization
 from DeepLabV3Plus import DeepLabV3Plus
 from UNet import UNet
 from UNetPlusPlus import UNetPlusPlus
 from SegFormer import SegFormer
+
 
 def main():
 
@@ -82,6 +83,11 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     
+    # Save model visualization
+    dummy_input = torch.randn(1, 1, 512, 512).to(device)
+    save_model_visualization(model, config["model_type"], dummy_input)
+
+    
     # Log model parameters
     experiment.log_parameters({
         "model": config["model_type"],
@@ -104,7 +110,6 @@ def main():
     # 6 Test model
     model_type = type(model).__name__
     test_model(model, device, test_batch_generator, test_names=test_names, test_idxs=test_idxs, model_name=model_type, experiment=experiment)
-
 
 
     # train_val splits for later (see code on cluster) 
