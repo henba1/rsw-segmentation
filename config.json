@@ -16,7 +16,7 @@
     "loadModel": true,
     "num_epochs": 1,
     "augment_factor": 2,
-    "dataset": "EUR",
+    "dataset": "both",
     "project_name": "ssqc-rsw-",
     "workspace": "simon-onyx"
 }

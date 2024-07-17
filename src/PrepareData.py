@@ -1,6 +1,6 @@
 import os
 import sys
-import glob
+from glob import glob
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,7 +29,7 @@ class PrepareData:
 
         if self.dataset == 'EUR':
             try:
-                npy_files = glob.glob(os.path.join(self.path, "all_images_data_eur.npy"))
+                npy_files = glob(os.path.join(self.path, "all_images_data_eur.npy"))
             except TypeError:
                 print("Error: No .npy files found in the directory: {self.path}")
                 print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
@@ -37,14 +37,14 @@ class PrepareData:
         
         elif self.dataset == 'lab':
             try:
-                npy_files = glob.glob(os.path.join(self.path, "all_images_data_lab.npy"))
+                npy_files = glob(os.path.join(self.path, "all_images_data_lab.npy"))
             except TypeError:
                 print("Error: No .npy files found in the directory: {self.path}")
                 print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
                 sys.exit(1)
         else:
             try:
-                npy_files = glob.glob(os.path.join(self.path, "*.npy"))
+                npy_files = glob(os.path.join(self.path, "*.npy"))
             except TypeError:
                 print("Error: No .npy files found in the directory: {self.path}")
                 print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
@@ -71,26 +71,41 @@ class PrepareData:
             dfs.append(df_img_has_mask)
         dfs_img_has_mask = pd.concat(dfs, ignore_index=True)
         return dfs_img_has_mask
+    
 
+    def get_material_properties(self, index):
+        dataset_material_properties = {
+            0: "2.0 mm (Boron steel) + 1.6 mm (CR5)",
+            1: "1.6 mm (CR5) + 2.0 mm (Boron steel)",
+            2: "1.6 mm (CR5) + 3.0 mm (CR300LA)",
+            3: "3.0 mm (CR300LA) + 1.6 mm (CR5)",
+            4: "mixed including 1.6 mm (CR5) + 1.6 mm (CR5)",
+            5: "3.0 mm (CR300LA) + 1.6 mm (CR5)"
+        }
+        return dataset_material_properties.get(index, "Unknown index")
+    
     def get_data_distribution_for_img_data(self, img_data):
         token = 0
-        df_img_has_mask = pd.DataFrame(columns=['image_idx', 'dataset_idx', 'has_mask', 'dataset'])
+        df_img_has_mask = pd.DataFrame(columns=['image_idx', 'dataset_idx', 'has_mask', 'dataset', 'material_properties'])
         df_img_has_mask["has_mask"] = df_img_has_mask["has_mask"].astype(bool)
 
         try:
-            dataset_name = img_data[0][0][4].split('\\')[1][:-2]
+            dataset_name = img_data[0][0][4].split('\\')[-1]
         except:
             token = 1
-            dataset_name = img_data[0][0][4].split('\\')[0][:-2]
+            dataset_name = img_data[0][0][4].split('\\')[0]
 
         for dataset_idx in range(len(img_data)):
             for image_idx in range(len(img_data[dataset_idx])):
                 condition_result = len(img_data[dataset_idx][image_idx][5]) != 0
                 if token == 1:
                     dataset = img_data[dataset_idx][0][4].split('\\')[0]
+                    material_property = self.get_material_properties(dataset_idx)
                 else:
-                    dataset = img_data[dataset_idx][0][4].split('\\')[1]
-                row_data = {'image_idx': image_idx, 'dataset_idx': dataset_idx, 'has_mask': condition_result, 'dataset': dataset.split('/')[-1]}
+                    dataset = img_data[dataset_idx][0][4].split('\\')[-1]
+                    #no material properties for lab dataset
+                    material_property = "Unknown"
+                row_data = {'image_idx': image_idx, 'dataset_idx': dataset_idx, 'has_mask': condition_result, 'dataset': dataset.split('\\')[-1], 'material_properties': material_property}
 
                 df_img_has_mask = pd.concat([df_img_has_mask, pd.DataFrame([row_data])], ignore_index=True)
 
@@ -107,8 +122,9 @@ class PrepareData:
                 dataset = img_data[dataset_idx][0][4].split('\\')[1]
 
             mask_frac.append((dataset.split('/')[-1], neg_frac))
-
-        print(f"Fraction of images in datasets {dataset_name.split('/')[-1]} containing no welding nugget, per dataset: {mask_frac}")
+        
+        backslash_char = '\\'
+        print(f"Fraction of images in datasets {dataset_name} containing no welding nugget, per dataset: {mask_frac}")
 
         return df_img_has_mask
 
@@ -140,7 +156,7 @@ class PrepareData:
         train_val_grouped = self.df_train_val['dataset'].str.split('_').str[0]
         test_grouped = self.df_test['dataset'].str.split('_').str[0]
         dataset_groups = sorted(train_val_grouped.unique(), key=lambda x: x.lower())
-        
+        print(f"Dataset groups: {dataset_groups}")
         for dataset, group in zip(self.data_list, dataset_groups):
             for num_set in range(len(dataset)):
                 train_idxs = self.df_train_val[(self.df_train_val['dataset_idx'] == num_set) & (self.df_train_val['dataset'].str.startswith(group))]['image_idx']
