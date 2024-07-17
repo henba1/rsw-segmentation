@@ -90,7 +90,7 @@ class PrepareData:
         df_img_has_mask["has_mask"] = df_img_has_mask["has_mask"].astype(bool)
 
         
-        dataset_name = img_data[0][0][4].split('\\')[-1]
+        dataset_name = img_data[0][0][4].split('/')[-1]
         if 'eur' in dataset_name.lower():
             token = 1
 
@@ -98,13 +98,13 @@ class PrepareData:
             for image_idx in range(len(img_data[dataset_idx])):
                 condition_result = len(img_data[dataset_idx][image_idx][5]) != 0
                 if token == 1:
-                    dataset = img_data[dataset_idx][0][4].split('\\')[0]
+                    dataset = img_data[dataset_idx][0][4].split('/')[0]
                     material_property = self.get_material_properties(dataset_idx)
                 else:
-                    dataset = img_data[dataset_idx][0][4].split('\\')[-1]
+                    dataset = img_data[dataset_idx][0][4].split('/')[-1]
                     #no material properties for lab dataset
                     material_property = "Unknown"
-                row_data = {'image_idx': image_idx, 'dataset_idx': dataset_idx, 'has_mask': condition_result, 'dataset': dataset.split('\\')[-1], 'material_properties': material_property}
+                row_data = {'image_idx': image_idx, 'dataset_idx': dataset_idx, 'has_mask': condition_result, 'dataset': dataset.split('/')[-1], 'material_properties': material_property}
 
                 df_img_has_mask = pd.concat([df_img_has_mask, pd.DataFrame([row_data])], ignore_index=True)
 
@@ -116,14 +116,14 @@ class PrepareData:
             neg_frac = amt_no_mask / amt_total
 
             if token == 1:
-                dataset = img_data[dataset_idx][0][4].split('\\')[0]
+                dataset = img_data[dataset_idx][0][4].split('/')[0]
             else:
-                dataset = img_data[dataset_idx][0][4].split('\\')[-1]
+                dataset = img_data[dataset_idx][0][4].split('/')[-1]
 
             mask_frac.append((dataset.split('/')[-1], neg_frac))
         
-        backslash_char = '\\'
-        print(f"Fraction of images in datasets {dataset_name.split(backslash_char)[-1]} containing no welding nugget, per dataset: {mask_frac}")
+        
+        print(f"Fraction of images in datasets {dataset_name.split('/')} containing no welding nugget, per dataset: {mask_frac}")
 
         return df_img_has_mask
 
