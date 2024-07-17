@@ -1,7 +1,7 @@
 {   
 
-    "npy_path": "R:\\R__Projects\\SSQC_experiments\\rsw_1\\rsw_project\\data",
-    "local": true,
+    "npy_path": "../data",
+    "local": false,
     "n_splits": 6,
     "random_state": 50,
     "train_batch_size": 8,

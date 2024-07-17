@@ -221,4 +221,4 @@ if __name__ == "__main__":
     main(args)
 
 #example CLI command to run the script:
-#python process_images.py --masks_computed False --base_path_lab "/home/wk560263/Dokumente/SSQC-research/rsw/data/labdata/lab_rsw_segmentation_" --base_path_eur "/home/wk560263/Dokumente/SSQC-research/rsw/data/ford_tessonics_data/Ford_Tessonics_Europe_Lab_Data_" --lab_useable 1 2 3 4 5 8 9 10 11 --eur_useable 1 4 5 6 7 10 --data_sources eur lab
+#python DatasetCreation.py --masks_computed False --base_path_lab "/home/wk560263/Dokumente/SSQC-research/rsw/data/labdata/lab_rsw_segmentation_" --base_path_eur "/home/wk560263/Dokumente/SSQC-research/rsw/data/ford_tessonics_data/Ford_Tessonics_Europe_Lab_Data_" --lab_useable 1 2 3 4 5 8 9 10 11 --eur_useable 1 4 5 6 7 10 --data_sources eur lab
