@@ -21,11 +21,11 @@ def main():
     
     npy_path = config.get("npy_path", None)
 
-    experiment = Experiment(
-        api_key="GeoZOdwTSNAEqugIyovCVq2Kv",
-        project_name=f"{config['project_name']}{config['model_type']}",
-        workspace=config["workspace"],
-    )
+    # experiment = Experiment(
+    #     api_key="GeoZOdwTSNAEqugIyovCVq2Kv",
+    #     project_name=f"{config['project_name']}{config['model_type']}",
+    #     workspace=config["workspace"],
+    # )
  
     # 1 Prepare data
     prepare_data = PrepareData(dataset=config["dataset"], n_splits=config["n_splits"], random_state=config["random_state"], local=config["local"], npy_path=npy_path)

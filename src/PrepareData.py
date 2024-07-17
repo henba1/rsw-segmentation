@@ -89,11 +89,10 @@ class PrepareData:
         df_img_has_mask = pd.DataFrame(columns=['image_idx', 'dataset_idx', 'has_mask', 'dataset', 'material_properties'])
         df_img_has_mask["has_mask"] = df_img_has_mask["has_mask"].astype(bool)
 
-        try:
-            dataset_name = img_data[0][0][4].split('\\')[-1]
-        except:
+        
+        dataset_name = img_data[0][0][4].split('\\')[-1]
+        if 'eur' in dataset_name.lower():
             token = 1
-            dataset_name = img_data[0][0][4].split('\\')[0]
 
         for dataset_idx in range(len(img_data)):
             for image_idx in range(len(img_data[dataset_idx])):
@@ -119,12 +118,12 @@ class PrepareData:
             if token == 1:
                 dataset = img_data[dataset_idx][0][4].split('\\')[0]
             else:
-                dataset = img_data[dataset_idx][0][4].split('\\')[1]
+                dataset = img_data[dataset_idx][0][4].split('\\')[-1]
 
             mask_frac.append((dataset.split('/')[-1], neg_frac))
         
         backslash_char = '\\'
-        print(f"Fraction of images in datasets {dataset_name} containing no welding nugget, per dataset: {mask_frac}")
+        print(f"Fraction of images in datasets {dataset_name.split(backslash_char)[-1]} containing no welding nugget, per dataset: {mask_frac}")
 
         return df_img_has_mask
 
