@@ -1,5 +1,6 @@
 import os
 import torch
+import json
 from torchviz import make_dot
 
 def save_model(model, epoch, directory="../models"):
@@ -61,3 +62,14 @@ def save_model_visualization(model, model_name, input_tensor, directory="../mode
     dot.format = 'png'
     dot.render(save_path)
     print(f"Model architecture visualization saved to {save_path}.png")
+
+def save_metrics_to_json(metrics, model_type, directory="../models"):
+    filename = f"{directory}{model_type}_metrics.json"
+    with open(filename, 'w') as f:
+        json.dump(metrics, f)
+
+def verify_predictions_and_labels(preds, labels):
+    print("Predictions min, max:", preds.min().item(), preds.max().item())
+    print("Labels min, max:", labels.min().item(), labels.max().item())
+    assert preds.min().item() >= 0 and preds.max().item() <= 1, "Predictions are out of range"
+    assert labels.min().item() >= 0 and labels.max().item() <= 1, "Labels are out of range"

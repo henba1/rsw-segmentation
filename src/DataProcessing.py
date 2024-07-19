@@ -27,7 +27,7 @@ class DataProcessing(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        original_image = self.images[idx]
+        image_tensor = self.images[idx]
         image, padding = normalize_and_pad_image(self.images[idx], self.target_size, self.resize_transform)
         coordinates = points_to_coordinates(self.mask_points[idx])
         mask, _ = create_and_pad_mask(self.images[idx].shape, coordinates, self.target_size, self.resize_transform)
@@ -35,7 +35,7 @@ class DataProcessing(Dataset):
         # print(self.images[idx].shape)
         # print(self.original_size[idx])
     
-        return original_image, image, mask, self.original_size[idx], padding  # Return padding information
+        return image_tensor, image, mask, self.original_size[idx], padding  # Return padding information
 
     @staticmethod
     def unpad_and_resize(tensor, original_shape, padding):
@@ -98,43 +98,49 @@ def points_to_coordinates(points):
     return coordinates
 
 
-def visual_inspect(original_image, mask_tensor, pred_tensor=None, save_path=None, original_shape=None, bin_thresh=0.5):
+def visual_inspect(image_tensor, mask_tensor, pred_tensor, resize_dim, save_path=None, original_shape=None, bin_thresh=0.5):
     def save_image(save_dir, filename):
         plt.axis('off')
         plt.savefig(os.path.join(save_dir, filename), bbox_inches='tight', pad_inches=0)
         plt.close()
 
     # Convert tensors to numpy arrays and adjust intensity range
+    image_np = image_tensor.squeeze().numpy() * 0.5 + 0.5
     mask_np = mask_tensor.squeeze().numpy()
     pred_np = pred_tensor.squeeze().numpy() if pred_tensor is not None else None
 
+    #determine cut-off in width dim 
+    image_np = image_np[:,:resize_dim]
+    mask_np = mask_np[:,:resize_dim]
+    pred_np = pred_np[:,: resize_dim]
+    
     if save_path:
         os.makedirs(save_path, exist_ok=True)
         
         # Initial Image
-        plt.imshow(original_image, cmap='gray')
+        plt.imshow(image_np, cmap='gray')
         save_image(save_path, "initial_image.png")
 
         # Ground Truth Overlay
-        plt.imshow(original_image, cmap='gray')
+        plt.imshow(image_np, cmap='gray')
         plt.imshow(mask_np, cmap='jet', alpha=0.4)
         save_image(save_path, "ground_truth_overlay.png")
 
         if pred_np is not None:
             # Prediction Overlay
-            plt.imshow(original_image, cmap='gray')
+            plt.imshow(image_np, cmap='gray')
             plt.imshow(pred_np, cmap='jet', alpha=0.4)
             save_image(save_path, "prediction_overlay.png")
 
             # Ground Truth and Prediction Overlay
-            plt.imshow(original_image, cmap='gray')
+            plt.imshow(image_np, cmap='gray')
             plt.imshow(mask_np, cmap='jet', alpha=0.4)
             plt.imshow(pred_np, cmap='jet', alpha=0.4)
             save_image(save_path, "gt_pred_overlay.png")
 
             # Binarized Prediction
             binarized_pred = (pred_np > bin_thresh).astype(np.float32)
-            plt.imshow(original_image, cmap='gray')
+            plt.imshow(image_np, cmap='gray')
             plt.imshow(binarized_pred, cmap='jet', alpha=0.5)
             save_image(save_path, f"binarized_prediction_thresh={bin_thresh}.png")
     else: 

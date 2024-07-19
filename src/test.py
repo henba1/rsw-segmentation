@@ -6,7 +6,7 @@ from DataProcessing import DataProcessing, visual_inspect
 import os
 import datetime
 
-def test_model(model, device, test_loader, test_names, test_idxs, test_dims, model_name, bin_thresh=0.5, experiment=None):
+def test_model(model, device, test_loader, test_names, test_idxs, test_dims, test_materials, resize_dim, model_name, bin_thresh=0.5, experiment=None):
     model.eval()
     iou_scores = []
     dice_scores = []
@@ -25,11 +25,13 @@ def test_model(model, device, test_loader, test_names, test_idxs, test_dims, mod
 
             for i in range(len(preds)):
                 original_image = original_images[i]
+                image = images[i]
                 pred = preds[i]
                 mask = masks[i]
                 original_shape = original_shapes[i]
                 padding = paddings[i]
 
+                image_resized = DataProcessing.unpad_and_resize(image, original_shape, padding)
                 pred_resized = DataProcessing.unpad_and_resize(pred, original_shape, padding)
                 mask_resized = DataProcessing.unpad_and_resize(mask, original_shape, padding)
 
@@ -41,9 +43,10 @@ def test_model(model, device, test_loader, test_names, test_idxs, test_dims, mod
                 # Get the original image name and index
                 image_name = test_names[idx * len(preds) + i]
                 image_idx = test_idxs[idx * len(preds) + i]
+                image_material = test_materials[idx * len(preds) + i]
 
                 # Save overlay images
-                visual_inspect(original_image, mask_resized, pred_tensor=pred_resized, save_path=os.path.join(save_dir, f"{image_name}_{image_idx}.png"), original_shape=original_shape, bin_thresh=bin_thresh) 
+                visual_inspect(image_resized, mask_resized, pred_tensor=pred_resized, resize_dim=resize_dim, save_path=os.path.join(save_dir, image_material, f"{image_name}_{image_idx}.png"), original_shape=original_shape, bin_thresh=bin_thresh) 
 
     mean_iou_score = np.mean(iou_scores)
     mean_dice_score = np.mean(dice_scores)

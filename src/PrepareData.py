@@ -9,8 +9,9 @@ from skimage import color
 
 
 class PrepareData:
-    def __init__(self, dataset='EUR', random_state=42, n_splits=10, local=False, npy_path=None):
+    def __init__(self, dataset='EUR', test_perc=0.2, random_state=42, n_splits=10, local=False, npy_path=None):
         self.dataset = dataset
+        self.test_perc = test_perc
         self.random_state = random_state
         self.n_splits = n_splits
         self.local = local
@@ -19,7 +20,7 @@ class PrepareData:
         self.dfs_img_has_mask = self.get_data_distribution()
         self.df_train_val, self.df_test, self.folds = self.divide_data()
         self.save_dataframes()
-        self.trainval, self.trainval_names, self.trainval_labelmasks, self.trainval_idxs, self.trainval_dims, self.test, self.test_names, self.test_labelmasks, self.test_idxs, self.test_dims = self.build_dataset()
+        self.trainval, self.trainval_names, self.trainval_labelmasks, self.trainval_idxs, self.trainval_dims, self.trainval_materials, self.test, self.test_names, self.test_labelmasks, self.test_idxs, self.test_dims, self.test_materials = self.build_dataset()
         #self.print_fold_indices()
         
     def load_data(self):
@@ -128,7 +129,7 @@ class PrepareData:
         return df_img_has_mask
 
     def divide_data(self):
-        train_val, test = train_test_split(self.dfs_img_has_mask, test_size=0.2, random_state=self.random_state, stratify=self.dfs_img_has_mask['has_mask'])
+        train_val, test = train_test_split(self.dfs_img_has_mask, test_size=self.test_perc, random_state=self.random_state, stratify=self.dfs_img_has_mask['has_mask'])
 
         skf = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
         folds = [(train_idx, val_idx) for train_idx, val_idx in skf.split(train_val, train_val['has_mask'])]
@@ -145,12 +146,15 @@ class PrepareData:
         img_masks_global = []
         img_idx_global = []
         img_dims_global = []
+        img_materials_global = []
 
         img_list_test_global = []
         img_names_test_global = []
         img_masks_test_global = []
         img_idx_test_global = []
         img_dims_test_global = []
+        img_materials_test_global = []
+
 
         train_val_grouped = self.df_train_val['dataset'].str.split('_').str[0]
         test_grouped = self.df_test['dataset'].str.split('_').str[0]
@@ -158,13 +162,19 @@ class PrepareData:
         print(f"Dataset groups: {dataset_groups}")
         for dataset, group in zip(self.data_list, dataset_groups):
             for num_set in range(len(dataset)):
-                train_idxs = self.df_train_val[(self.df_train_val['dataset_idx'] == num_set) & (self.df_train_val['dataset'].str.startswith(group))]['image_idx']
-                test_idxs = self.df_test[(self.df_test['dataset_idx'] == num_set) & (self.df_test['dataset'].str.startswith(group))]['image_idx']
+                train_mask = self.df_train_val[(self.df_train_val['dataset_idx'] == num_set) & (self.df_train_val['dataset'].str.startswith(group))]
+                train_idxs = train_mask['image_idx']
+                train_materials = train_mask['material_properties']
+                
+                test_mask = self.df_test[(self.df_test['dataset_idx'] == num_set) & (self.df_test['dataset'].str.startswith(group))]
+                test_idxs = test_mask['image_idx']
+                test_materials = test_mask['material_properties']
 
                 img_list = [dataset[num_set][ind][0] for ind in train_idxs]
                 img_names = [dataset[num_set][ind][2] for ind in train_idxs]
                 img_masks = [dataset[num_set][ind][5] for ind in train_idxs]
                 img_dims = [dataset[num_set][ind][8] for ind in train_idxs]
+
 
                 img_list_test = [dataset[num_set][ind][0] for ind in test_idxs]
                 img_names_test = [dataset[num_set][ind][2] for ind in test_idxs]
@@ -175,16 +185,18 @@ class PrepareData:
                 img_names_global.extend(img_names)
                 img_masks_global.extend(img_masks)
                 img_idx_global.extend([(ind, num_set) for ind in train_idxs])
+                img_materials_global.extend([material for material in train_materials])
                 img_dims_global.extend(img_dims)
 
                 img_list_test_global.extend(img_list_test)
                 img_names_test_global.extend(img_names_test)
                 img_masks_test_global.extend(img_masks_test)
                 img_idx_test_global.extend([(ind, num_set) for ind in test_idxs])
+                img_materials_test_global.extend([material for material in test_materials])
                 img_dims_test_global.extend(img_dims_test)
 
 
-        return img_list_global, img_names_global, img_masks_global, img_idx_global, img_dims_global, img_list_test_global, img_names_test_global, img_masks_test_global, img_idx_test_global, img_dims_test_global
+        return img_list_global, img_names_global, img_masks_global, img_idx_global, img_dims_global, img_materials_global, img_list_test_global, img_names_test_global, img_masks_test_global, img_idx_test_global, img_dims_test_global, img_materials_test_global
 
     def display_img(img_data, dataset_idx, target_filename, show_annot_mask=1, color_space='gray', figsize=(16, 10)):
         """
