@@ -1,8 +1,8 @@
 #!/usr/local_rwth/bin/zsh
 
-#SBATCH --job-name=ssqc_DLv3Plus
-#SBATCH --output=./prints_DLv3Plus.o%J
-#SBATCH --time=8:00:00
+#SBATCH --job-name=ssqc_Prelim_unetPP
+#SBATCH --output=../cluster_printouts/prints_Prelim_unetPP.o%J
+#SBATCH --time=3:00:00
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
@@ -13,4 +13,4 @@ module load GCC
 module load Python
 module load CUDA
 
-python ./src/main.py deeplabv3plus
+python main.py unetplusplus 1

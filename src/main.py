@@ -19,26 +19,33 @@ def main():
 
     parser = argparse.ArgumentParser(description="Model Training Script")
     parser.add_argument('model_name', type=str, help='Name of the model (e.g., deeplabv3plus, unet, etc.)')
+    parser.add_argument('preliminary_training', type=int, help='Shorter training time (different config parameters for each model) for quicker results : 0 for normal training 1 for quicker training')
     args = parser.parse_args()
+    
+    if args.preliminary_training == 1:
+        prelim = True
+        print('PRELIMARY TRAINING SELECTED')
+    else:
+        prelim = False
     
     # Initialize model and get config 
     if args.model_name == "deeplabv3plus":
         model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
-        config = get_config(model)
+        config = get_config(model, prelim)
         model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
     elif args.model_name == "unet":
         model = UNet(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
-        config = get_config(model)
+        config = get_config(model, prelim)
         #overwrite
         model = UNet(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
     elif args.model_name == "unetplusplus":
         model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
-        config = get_config(model)
+        config = get_config(model, prelim)
         #overwrite
         model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
     elif args.model_name == "segformer":
         model = SegFormer(num_labels=1)
-        config = get_config(model)
+        config = get_config(model, prelim)
 
 
     npy_path = config.get("npy_path", None)
@@ -135,20 +142,20 @@ def main():
     model_type = type(model).__name__
 
     if config["loadModel"]:
-        model, up_to_epoch = load_model(model)
+        model, up_to_epoch = load_model(model, prelim)
         print(f"Model loaded from epoch {up_to_epoch}")
     else:
         if config['estimate_train_time']:
-            train_model(model, device, train_batch_generator, num_epochs=1, lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=0)
+            train_model(model, device, train_batch_generator, num_epochs=1, lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=0, prelim=prelim)
         else:
-            # 5 Training 
-            train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=0)
+            # 4 Training 
+            train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=0, prelim=prelim)
     
     if config['continue_training']:
-        # 5 Training 
-        train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=up_to_epoch)
+        # 4 Training 
+        train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=up_to_epoch, prelim=prelim)
 
-    # 6 Test model
+    # 5 Test model
     if config['testModel']:
         test_model(model, device, test_batch_generator, test_names=test_names, test_idxs=test_idxs, test_dims=test_dims, test_materials=test_materials, resize_dim=resize_dim, model_name=model_type, bin_thresh=config['bin_thresh'], experiment=experiment)
 

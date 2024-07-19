@@ -10,7 +10,7 @@ from model_utils import save_model, verify_predictions_and_labels, save_metrics_
 import json
 
 
-def train_model(model, device, train_loader, val_loader=None, num_epochs=50, lr=1e-4, checkpoint_batch=50, model_name='UNet', experiment=None, verify=False, up_to_epoch=0): 
+def train_model(model, device, train_loader, val_loader=None, num_epochs=50, lr=1e-4, checkpoint_batch=50, model_name='UNet', experiment=None, verify=False, up_to_epoch=0, prelim=False): 
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10, verbose=True)
     criterion = nn.BCELoss()
@@ -68,7 +68,7 @@ def train_model(model, device, train_loader, val_loader=None, num_epochs=50, lr=
 
             # Save model after every checkpoint_batch amount of batches
             if total_batches > 0 and total_batches % checkpoint_batch == 0:
-                save_model(model, epoch+up_to_epoch, directory="../models")
+                save_model(model, epoch+up_to_epoch, directory="../models", prelim=prelim)
         
         epoch_train_loss = np.mean(train_losses)
         epoch_train_iou = np.mean(train_iou_scores)
@@ -89,7 +89,7 @@ def train_model(model, device, train_loader, val_loader=None, num_epochs=50, lr=
         scheduler.step(epoch_train_loss)
         
         # Save model after every epoch
-        save_model(model, epoch+up_to_epoch, directory="../models")
+        save_model(model, epoch+up_to_epoch, directory="../models", prelim=prelim)
 
         # Validation loop
         if val_loader:
@@ -157,7 +157,7 @@ def train_model(model, device, train_loader, val_loader=None, num_epochs=50, lr=
         }
         
         
-        save_metrics_to_json(metrics, type(model).__name__, directory='../models')
+        save_metrics_to_json(metrics, type(model).__name__, directory='../models', prelim=prelim)
 
 def check_GPU():
     if torch.cuda.is_available():

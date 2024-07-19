@@ -3,7 +3,7 @@ import torch
 import json
 from torchviz import make_dot
 
-def save_model(model, epoch, directory="../models"):
+def save_model(model, epoch, directory="../models", prelim=False):
     """
     Save the model to the specified directory, overwriting any existing file with the same name.
     Args:
@@ -13,6 +13,13 @@ def save_model(model, epoch, directory="../models"):
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+    if prelim:
+        directory = os.path.join(directory, 'prelim')
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    
     model_type = type(model).__name__
     save_path = os.path.join(directory, f"{model_type}.pt")
     torch.save({
@@ -21,13 +28,16 @@ def save_model(model, epoch, directory="../models"):
     }, save_path)
     print(f"Model saved to {save_path}")
 
-def load_model(model, directory="../models"):
+def load_model(model, directory="../models", prelim=False):
     """
     Load the most recent saved model from the specified directory.
     Args:
     - model (torch.nn.Module): The model to load the state dictionary into.
     - directory (str): The directory to load the model from.
     """
+    if prelim:
+        directory = os.path.join(directory, 'prelim')
+
     model_type = type(model).__name__
     load_path = os.path.join(directory, f"{model_type}.pt")
     if not os.path.exists(load_path):
@@ -40,7 +50,7 @@ def load_model(model, directory="../models"):
     print(f"Model loaded from {load_path} (epoch {epoch})")
     return model, epoch
 
-def save_model_visualization(model, model_name, input_tensor, directory="../models"):
+def save_model_visualization(model, model_name, input_tensor, directory="../models", prelim=False):
     """
     Save the model architecture visualization.
     
@@ -52,6 +62,12 @@ def save_model_visualization(model, model_name, input_tensor, directory="../mode
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+    if prelim:
+        directory = os.path.join(directory, 'prelim')
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
     model.eval()
     # Generate the visualization
     y = model(input_tensor)
@@ -63,8 +79,14 @@ def save_model_visualization(model, model_name, input_tensor, directory="../mode
     dot.render(save_path)
     print(f"Model architecture visualization saved to {save_path}.png")
 
-def save_metrics_to_json(metrics, model_type, directory="../models"):
-    filename = f"{directory}{model_type}_metrics.json"
+def save_metrics_to_json(metrics, model_type, directory="../models", prelim=False):
+    if prelim:
+        directory = os.path.join(directory, 'prelim')
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    
+    
+    filename = os.path.join(directory, f"{model_type}_metrics.json")
     with open(filename, 'w') as f:
         json.dump(metrics, f)
 
@@ -75,9 +97,16 @@ def verify_predictions_and_labels(preds, labels):
     assert labels.min().item() >= 0 and labels.max().item() <= 1, "Labels are out of range"
 
 
-def get_config(model):
+def get_config(model, prelim=False):
     model_type = type(model).__name__
-    config_file = f'../configs/{model_type}_config.json'
+    config_dir = '../configs'
+    
+    if prelim:
+        config_dir = os.path.join(config_dir, 'prelim')
+
+    config_file = os.path.join(config_dir, f'{model_type}_config.json')
+    if not os.path.exists(config_file):
+        raise FileNotFoundError(f"No configuration file found at {config_file}")
     with open(config_file, 'r') as f:
         config = json.load(f)
     
