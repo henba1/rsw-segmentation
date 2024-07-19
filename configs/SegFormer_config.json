@@ -1,0 +1,30 @@
+{   
+    "model_type": "segformer",    
+    "project_name": "ssqc-rsw-",
+    "workspace": "simon-onyx",
+    
+    "npy_path": "../data",
+    "dataset": "both",
+    "test_perc": 0.2,
+    "local": false,
+    "n_splits": 6,
+    "random_state": 50,
+    "train_batch_size": 64,
+    "test_batch_size": 8,
+    "num_epochs": 250,
+    "checkpoint_batch": 100,
+
+    "bin_thresh": 0.35,
+    "rotation_deg": 20,
+    "translation": 0.1,
+    "resize_dim": 512,
+    "augment_factor": 3,
+    
+    "lr": 1e-4,
+    "model_enc": "resnet34",
+    "encoder_weights": "imagenet",
+    "loadModel": false,
+    "continue_training": false,
+    "testModel": true,
+    "estimate_train_time": false
+}
