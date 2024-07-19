@@ -52,7 +52,7 @@ def save_model_visualization(model, model_name, input_tensor, directory="../mode
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
-
+    model.eval()
     # Generate the visualization
     y = model(input_tensor)
     dot = make_dot(y, params=dict(model.named_parameters()))
@@ -73,3 +73,13 @@ def verify_predictions_and_labels(preds, labels):
     print("Labels min, max:", labels.min().item(), labels.max().item())
     assert preds.min().item() >= 0 and preds.max().item() <= 1, "Predictions are out of range"
     assert labels.min().item() >= 0 and labels.max().item() <= 1, "Labels are out of range"
+
+
+def get_config(model):
+    model_type = type(model).__name__
+    config_file = f'../configs/{model_type}_config.json'
+    with open(config_file, 'r') as f:
+        config = json.load(f)
+    
+    del model
+    return config

@@ -1,5 +1,6 @@
 import json
 import random
+import argparse
 from comet_ml import Experiment
 import torch
 from torchvision import transforms
@@ -8,16 +9,38 @@ from DataProcessing import DataProcessing
 from BatchGenerator import BatchGenerator
 from train import train_model, check_GPU
 from test import test_model
-from model_utils import load_model, save_model_visualization
+from model_utils import get_config, load_model, save_model_visualization
 from DeepLabV3Plus import DeepLabV3Plus
 from UNet import UNet
 from UNetPlusPlus import UNetPlusPlus
 from SegFormer import SegFormer
 
 def main():
-    with open('../config.json', 'r') as f:
-        config = json.load(f)
+
+    parser = argparse.ArgumentParser(description="Model Training Script")
+    parser.add_argument('model_name', type=str, help='Name of the model (e.g., deeplabv3plus, unet, etc.)')
+    args = parser.parse_args()
     
+    # Initialize model and get config 
+    if args.model_name == "deeplabv3plus":
+        model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
+        config = get_config(model)
+        model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
+    elif args.model_name == "unet":
+        model = UNet(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
+        config = get_config(model)
+        #overwrite
+        model = UNet(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
+    elif args.model_name == "unetplusplus":
+        model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
+        config = get_config(model)
+        #overwrite
+        model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
+    elif args.model_name == "segformer":
+        model = SegFormer(num_labels=1)
+        config = get_config(model)
+
+
     npy_path = config.get("npy_path", None)
 
     experiment = Experiment(
@@ -86,15 +109,6 @@ def main():
     train_batch_generator = BatchGenerator(train_dataset, config["train_batch_size"], augmentations=data_augmentation_transforms, augment_factor=config["augment_factor"])
     test_batch_generator = BatchGenerator(test_dataset, config["test_batch_size"], augmentations=None, augment_factor=1)
     
-    # 4 Initialize model
-    if config["model_type"] == "deeplabv3plus":
-        model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
-    elif config["model_type"] == "unet":
-        model = UNet(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
-    elif config["model_type"] == "unetplusplus":
-        model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
-    elif config["model_type"] == "segformer":
-        model = SegFormer(num_labels=1)
     
     
     check_GPU()
@@ -118,22 +132,23 @@ def main():
         "num_epochs": config["num_epochs"]
     })
 
+    model_type = type(model).__name__
+
     if config["loadModel"]:
         model, up_to_epoch = load_model(model)
         print(f"Model loaded from epoch {up_to_epoch}")
     else:
         if config['estimate_train_time']:
-            train_model(model, device, train_batch_generator, num_epochs=1, lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], experiment=experiment, verify=False, up_to_epoch=0)
+            train_model(model, device, train_batch_generator, num_epochs=1, lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=0)
         else:
             # 5 Training 
-            train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], experiment=experiment, verify=False, up_to_epoch=0)
+            train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=0)
     
     if config['continue_training']:
         # 5 Training 
-        train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], experiment=experiment, verify=False, up_to_epoch=up_to_epoch)
+        train_model(model, device, train_batch_generator, num_epochs=config["num_epochs"], lr=config["lr"], checkpoint_batch=config['checkpoint_batch'], model_name=model_type, experiment=experiment, verify=False, up_to_epoch=up_to_epoch)
 
     # 6 Test model
-    model_type = type(model).__name__
     if config['testModel']:
         test_model(model, device, test_batch_generator, test_names=test_names, test_idxs=test_idxs, test_dims=test_dims, test_materials=test_materials, resize_dim=resize_dim, model_name=model_type, bin_thresh=config['bin_thresh'], experiment=experiment)
 
