@@ -1,1 +1,1 @@
-{"epoch": 45, "train_iou": 0.7211496860950024, "train_dice": 0.7536513549940926, "train_accuracy": 0.9503146975071399, "val_iou": null, "val_dice": null, "val_accuracy": null}
+{"epoch": 107, "train_iou": 0.7234164669916228, "train_dice": 0.7559353283473423, "train_accuracy": 0.9508222821470979, "val_iou": null, "val_dice": null, "val_accuracy": null}
