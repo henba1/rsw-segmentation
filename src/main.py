@@ -20,31 +20,31 @@ def main():
     parser = argparse.ArgumentParser(description="Model Training Script")
     parser.add_argument('model_name', type=str, help='Name of the model (e.g., deeplabv3plus, unet, etc.)')
     parser.add_argument('preliminary_training', type=int, help='Shorter training time (different config parameters for each model) for quicker results : 0 for normal training 1 for quicker training')
+    parser.add_argument('use_pretrained', type=int, default=1, help='Use pretrained weights: 1 for pretrained, 0 for training from scratch')
+
     args = parser.parse_args()
-    
-    if args.preliminary_training == 1:
-        prelim = True
-        print('PRELIMARY TRAINING SELECTED')
-    else:
-        prelim = False
-    
+
+    prelim = args.preliminary_training == 1
+    if prelim:
+        print('PRELIMINARY TRAINING SELECTED')
+
+    use_pretrained = args.use_pretrained == 1
+
     # Initialize model and get config 
     if args.model_name == "deeplabv3plus":
-        model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
+        model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=use_pretrained)
         config = get_config(model, prelim)
-        model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
+        model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
     elif args.model_name == "unet":
-        model = UNet(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
+        model = UNet(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=use_pretrained)
         config = get_config(model, prelim)
-        #overwrite
-        model = UNet(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
+        model = UNet(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
     elif args.model_name == "unetplusplus":
-        model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=True)
+        model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=use_pretrained)
         config = get_config(model, prelim)
-        #overwrite
-        model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=config["encoder_weights"] == "imagenet")
+        model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
     elif args.model_name == "segformer":
-        model = SegFormer(num_labels=1)
+        model = SegFormer(num_labels=1, use_pretrained=use_pretrained)
         config = get_config(model, prelim)
 
 

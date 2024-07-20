@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=ssqc_SegFormer
 #SBATCH --output=../cluster_printouts/prints_SegFormer.o%J
-#SBATCH --time=9:00:00
+#SBATCH --time=15:00:00
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
@@ -13,4 +13,4 @@ module load GCC
 module load Python
 module load CUDA
 
-python main.py segformer 0
+python main.py segformer 0 0
