@@ -4,7 +4,8 @@
     "workspace": "simon-onyx",
     
     "npy_path": "../data",
-    "dataset": "lab",
+    "dataset": "EUR",
+    "groupby_material": true,
     "test_perc": 0.2,
     "local": false,
     "n_splits": 6,
@@ -28,8 +29,8 @@
     "lr": 1e-4,
     "model_enc": "resnet34",
     "encoder_weights": "imagenet",
-    "loadModel": false,
+    "loadModel": true,
     "continue_training": false,
-    "testModel": false,
+    "testModel": true,
     "estimate_train_time": false
 }

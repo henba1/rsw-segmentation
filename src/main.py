@@ -171,9 +171,20 @@ def main():
 
     # 5 Test model
     if config['testModel']:
-        test_model(model, device, test_batch_generator, test_names=test_names, test_idxs=test_idxs, test_dims=test_dims, test_materials=test_materials, resize_dim=resize_dim, model_name=model_type, bin_thresh=config['bin_thresh'], experiment=experiment)
-
-
+        test_model(
+            model, 
+            device, 
+            test_batch_generator, 
+            test_names=test_names, 
+            test_idxs=test_idxs, 
+            test_dims=test_dims, 
+            test_materials=test_materials, 
+            resize_dim=resize_dim, 
+            model_name=model_type, 
+            bin_thresh=config['bin_thresh'], 
+            experiment=experiment, 
+            groupby_material=config['groupby_material']
+        )
 
     # # train_val splits for later (folds are implemented: prepare_data.folds)
 

@@ -5,6 +5,7 @@
     
     "npy_path": "../data",
     "dataset": "lab",
+    "groupby_material": true,
     "test_perc": 0.2,
     "local": false,
     "n_splits": 6,

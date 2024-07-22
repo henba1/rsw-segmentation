@@ -34,12 +34,16 @@ def load_model(model, directory="../models", prelim=False):
     Args:
     - model (torch.nn.Module): The model to load the state dictionary into.
     - directory (str): The directory to load the model from.
+    - prelim (bool): Flag to indicate if loading from the preliminary directory.
     """
     if prelim:
         directory = os.path.join(directory, 'prelim')
+    else:
+        directory = "../models"
 
     model_type = type(model).__name__
     load_path = os.path.join(directory, f"{model_type}.pt")
+
     if not os.path.exists(load_path):
         raise FileNotFoundError(f"No saved model found at {load_path}")
     else:
