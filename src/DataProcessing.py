@@ -1,12 +1,13 @@
 import os
 import numpy as np
+from torch import clamp
+from torch import randn
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.transforms.functional import to_pil_image, to_tensor
 from PIL import Image
 from skimage.draw import polygon
 import matplotlib.pyplot as plt
-
 
 class DataProcessing(Dataset):
     def __init__(self, images, mask_points, original_size, target_size=(512, 512), resize_transform=None):
@@ -97,6 +98,52 @@ def points_to_coordinates(points):
     coordinates = np.array(points).reshape(-1, 2)
     return coordinates
 
+
+def apply_transforms(image, mask, transforms, add_noise=False, noise_params=None):
+    """
+    Apply the same transformations to both image and mask.
+    Args:
+    - image (Tensor): The input image tensor.
+    - mask (Tensor): The corresponding mask tensor.
+    - transforms (torchvision.transforms.Compose): The composed transformations to apply.
+    - add_noise (bool): Whether to add noise to the image.
+    - noise_params (dict): Parameters for the noise function.
+    Returns:
+    - transformed_image (Tensor): The transformed image tensor.
+    - transformed_mask (Tensor): The transformed mask tensor.
+    """
+    image_pil = to_pil_image(image)
+    mask_pil = to_pil_image(mask)
+
+    # Apply transformations to both image and mask
+    image_transformed = transforms(image_pil)
+    mask_transformed = transforms(mask_pil)
+
+    # Convert back to tensors
+    image_transformed = to_tensor(image_transformed)
+    mask_transformed = to_tensor(mask_transformed)
+
+    # Add noise if specified
+    if add_noise and noise_params:
+        image_transformed = add_gaussian_noise(image_transformed, **noise_params)
+
+    return image_transformed, mask_transformed
+
+def add_gaussian_noise(image, mean=0.0, std=0.1):
+    """
+    Add Gaussian noise to a tensor image.
+    Args:
+    - image (Tensor): The input image tensor.
+    - mean (float): The mean of the Gaussian noise.
+    - std (float): The standard deviation of the Gaussian noise.
+    Returns:
+    - noisy_image (Tensor): The image with added Gaussian noise.
+    """
+    noise = randn(image.size()) * std + mean
+    noisy_image = image + noise
+    noisy_image = clamp(noisy_image, 0.0, 1.0)  # Ensure pixel values are in range [0, 1]
+
+    return noisy_image
 
 def visual_inspect(image_tensor, mask_tensor, pred_tensor, resize_dim, save_path=None, original_shape=None, bin_thresh=0.5):
     def save_image(save_dir, filename):

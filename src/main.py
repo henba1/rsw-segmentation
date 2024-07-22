@@ -12,6 +12,7 @@ from test import test_model
 from model_utils import get_config, load_model, save_model_visualization
 from DeepLabV3Plus import DeepLabV3Plus
 from UNet import UNet
+from MiniUNet import MiniUNet
 from UNetPlusPlus import UNetPlusPlus
 from SegFormer import SegFormer
 
@@ -45,6 +46,12 @@ def main():
         model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
     elif args.model_name == "segformer":
         model = SegFormer(num_labels=1, use_pretrained=use_pretrained)
+        config = get_config(model, prelim)
+    elif args.model_name == "miniunet":
+        if use_pretrained:
+            print("MiniUNet is not available with a pre-trained encoder.")
+            exit(1)
+        model = MiniUNet(in_channels=1, out_channels=1)
         config = get_config(model, prelim)
 
 
@@ -113,9 +120,16 @@ def main():
     ])
 
     # 3 Create batches 
-    train_batch_generator = BatchGenerator(train_dataset, config["train_batch_size"], augmentations=data_augmentation_transforms, augment_factor=config["augment_factor"])
-    test_batch_generator = BatchGenerator(test_dataset, config["test_batch_size"], augmentations=None, augment_factor=1)
+
+    train_batch_generator = BatchGenerator(
+                            train_dataset, 
+                            config["train_batch_size"], 
+                            augmentations=data_augmentation_transforms, 
+                            augment_factor=config["augment_factor"], 
+                            add_noise=config['add_noise'], 
+                            noise_params=config["noise_params"])
     
+    test_batch_generator = BatchGenerator(test_dataset, config["test_batch_size"], augmentations=None, augment_factor=1)
     
     
     check_GPU()

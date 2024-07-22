@@ -1,13 +1,16 @@
-import torch
-from torchvision.transforms.functional import to_pil_image, to_tensor
 import time
+import torch
+from torch import stack
+from DataProcessing import apply_transforms
 
 class BatchGenerator:
-    def __init__(self, dataset, batch_size, augmentations=None, augment_factor=1):
+    def __init__(self, dataset, batch_size, augmentations=None, augment_factor=1, add_noise=False, noise_params=None):
         self.dataset = dataset
         self.batch_size = batch_size
         self.augmentations = augmentations
         self.augment_factor = augment_factor
+        self.add_noise = add_noise
+        self.noise_params = noise_params
 
     def __len__(self):
         return len(self.dataset) * self.augment_factor
@@ -20,22 +23,36 @@ class BatchGenerator:
         batch_paddings = []
 
         for idx in range(len(self.dataset)):
-            for _ in range(self.augment_factor):
-                original_image, image, mask, original_shape, padding = self.dataset[idx]
+
+            original_image, image, mask, original_shape, padding = self.dataset[idx]
+            # Include the original image
+            batch_original_images.append(original_image)
+            batch_images.append(image)
+            batch_masks.append(mask)
+            batch_shapes.append(original_shape)
+            batch_paddings.append(padding)
+
+            if len(batch_images) == self.batch_size:
+                yield batch_original_images, stack(batch_images), stack(batch_masks), batch_shapes, batch_paddings
+                batch_original_images = []
+                batch_images = []
+                batch_masks = []
+                batch_shapes = []
+                batch_paddings = []
+
+            for _ in range(self.augment_factor - 1):
+                if self.augmentations:
+                    
+                    image, mask = apply_transforms(image, mask, self.augmentations, self.add_noise, self.noise_params)
                 
                 batch_original_images.append(original_image)
+                batch_images.append(image)
+                batch_masks.append(mask)
                 batch_shapes.append(original_shape)
                 batch_paddings.append(padding)
 
-                if self.augmentations:
-                    image, mask = apply_transforms(image, mask, self.augmentations)
-                
-                batch_images.append(image)
-                batch_masks.append(mask)
-
-
                 if len(batch_images) == self.batch_size:
-                    yield batch_original_images, torch.stack(batch_images), torch.stack(batch_masks), batch_shapes, batch_paddings
+                    yield batch_original_images, stack(batch_images), stack(batch_masks), batch_shapes, batch_paddings
                     batch_original_images = []
                     batch_images = []
                     batch_masks = []
@@ -43,7 +60,7 @@ class BatchGenerator:
                     batch_paddings = []
 
         if batch_images:
-            yield batch_original_images, torch.stack(batch_images), torch.stack(batch_masks), batch_shapes, batch_paddings
+            yield batch_original_images, stack(batch_images), stack(batch_masks), batch_shapes, batch_paddings
 
     @staticmethod
     def find_optimal_batch_size(model, device, dataset, starting_batch_size=8, increment=8, max_memory_usage=0.9):
@@ -80,26 +97,3 @@ class BatchGenerator:
 
         return batch_size - increment
 
-def apply_transforms(image, mask, transforms):
-    """
-    Apply the same transformations to both image and mask.
-    Args:
-    - image (Tensor): The input image tensor.
-    - mask (Tensor): The corresponding mask tensor.
-    - transforms (torchvision.transforms.Compose): The composed transformations to apply.
-    Returns:
-    - transformed_image (Tensor): The transformed image tensor.
-    - transformed_mask (Tensor): The transformed mask tensor.
-    """
-    image_pil = to_pil_image(image)
-    mask_pil = to_pil_image(mask)
-
-    # Apply transformations to both image and mask
-    image_transformed = transforms(image_pil)
-    mask_transformed = transforms(mask_pil)
-
-    # Convert back to tensors
-    image_transformed = to_tensor(image_transformed)
-    mask_transformed = to_tensor(mask_transformed)
-
-    return image_transformed, mask_transformed

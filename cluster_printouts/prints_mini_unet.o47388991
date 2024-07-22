@@ -1,0 +1,133 @@
+[INFO] Module GCC/11.3.0 loaded.
+[INFO] Module Python/3.10.4 loaded.
+[INFO] Module CUDA/12.3.0 loaded.
+[codecarbon INFO @ 18:56:18] [setup] RAM Tracking...
+[codecarbon INFO @ 18:56:18] [setup] GPU Tracking...
+[codecarbon INFO @ 18:56:18] Tracking Nvidia GPU via pynvml
+[codecarbon INFO @ 18:56:18] [setup] CPU Tracking...
+[codecarbon INFO @ 18:56:18] Tracking Intel CPU via RAPL interface
+[codecarbon INFO @ 18:56:18] >>> Tracker's metadata:
+[codecarbon INFO @ 18:56:18]   Platform system: Linux-4.18.0-553.8.1.el8_10.x86_64-x86_64-with-glibc2.28
+[codecarbon INFO @ 18:56:18]   Python version: 3.10.4
+[codecarbon INFO @ 18:56:18]   CodeCarbon version: 2.5.0
+[codecarbon INFO @ 18:56:18]   Available RAM : 32.000 GB
+[codecarbon INFO @ 18:56:18]   CPU count: 8
+[codecarbon INFO @ 18:56:18]   CPU model: Intel(R) Xeon(R) Platinum 8468
+[codecarbon INFO @ 18:56:18]   GPU count: 1
+[codecarbon INFO @ 18:56:18]   GPU model: 1 x NVIDIA H100
+[codecarbon INFO @ 18:56:21] Saving emissions data to file /w0/tmp/slurm_wk560263.47388991/tmpm4uu_pcb/codecarbon/emissions.csv
+COMET INFO: Experiment is live on comet.com https://www.comet.com/simon-onyx/ssqc-rsw-miniunet/2b4121b9cf1a4f2895552b941681a0e7
+
+COMET ERROR: Error logging git-related information
+Fraction of images in datasets ['lab_rsw_segmentation_1'] containing no welding nugget, per dataset: [('lab_rsw_segmentation_1', 0.12666666666666668), ('lab_rsw_segmentation_2', 0.13445378151260504), ('lab_rsw_segmentation_3', 0.45), ('lab_rsw_segmentation_4', 0.3225806451612903), ('lab_rsw_segmentation_5', 0.05), ('lab_rsw_segmentation_8', 0.0), ('lab_rsw_segmentation_9', 0.08620689655172414), ('lab_rsw_segmentation_10', 0.22413793103448276), ('lab_rsw_segmentation_11', 0.0)]
+Dataset groups: ['lab']
+========================================================================
+GPU: NVIDIA H100
+GPU Memory Allocated: 382.00 MB
+GPU Memory Cached: 382.00 MB
+========================================================================
+Model architecture visualization saved to ../models/miniunet_architecture.png
+/home/wk560263/.local/lib/python3.10/site-packages/torch/optim/lr_scheduler.py:28: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn("The verbose parameter is deprecated. Please use get_last_lr() "
+Model was trained up to epoch:
+0
+==============================
+Using device: cuda
+[codecarbon INFO @ 18:56:36] Energy consumed for RAM : 0.000050 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:56:36] Energy consumed for all GPUs : 0.000936 kWh. Total GPU Power : 224.14281485757627 W
+[codecarbon INFO @ 18:56:36] Energy consumed for all CPUs : 0.002135 kWh. Total CPU Power : 511.40397790072115 W
+[codecarbon INFO @ 18:56:36] 0.003121 kWh of electricity used since the beginning.
+Epoch 1 Training Loss: 0.6745
+Epoch 1 Training IoU: 0.6445
+Epoch 1 Training Dice: 0.6445
+Epoch 1 Training Accuracy: 0.9374
+Model saved to ../models/MiniUNet.pt
+Epoch 1 completed in 16.6803 seconds
+[codecarbon INFO @ 18:56:51] Energy consumed for RAM : 0.000100 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:56:51] Energy consumed for all GPUs : 0.002283 kWh. Total GPU Power : 323.4833466394009 W
+[codecarbon INFO @ 18:56:51] Energy consumed for all CPUs : 0.004281 kWh. Total CPU Power : 515.2367815073208 W
+[codecarbon INFO @ 18:56:51] 0.006664 kWh of electricity used since the beginning.
+Epoch 2 Training Loss: 0.6700
+Epoch 2 Training IoU: 0.6447
+Epoch 2 Training Dice: 0.6447
+Epoch 2 Training Accuracy: 0.9374
+Model saved to ../models/MiniUNet.pt
+Epoch 2 completed in 16.5375 seconds
+[codecarbon INFO @ 18:57:06] Energy consumed for RAM : 0.000150 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:57:06] Energy consumed for all GPUs : 0.003628 kWh. Total GPU Power : 323.00722633255845 W
+[codecarbon INFO @ 18:57:06] Energy consumed for all CPUs : 0.006438 kWh. Total CPU Power : 517.5924685103319 W
+[codecarbon INFO @ 18:57:06] 0.010216 kWh of electricity used since the beginning.
+Epoch 3 Training Loss: 0.6638
+Epoch 3 Training IoU: 0.6442
+Epoch 3 Training Dice: 0.6442
+Epoch 3 Training Accuracy: 0.9373
+Model saved to ../models/MiniUNet.pt
+Epoch 3 completed in 16.5516 seconds
+Model saved to ../models/MiniUNet.pt
+[codecarbon INFO @ 18:57:21] Energy consumed for RAM : 0.000200 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:57:21] Energy consumed for all GPUs : 0.004982 kWh. Total GPU Power : 325.0469090948481 W
+[codecarbon INFO @ 18:57:21] Energy consumed for all CPUs : 0.008594 kWh. Total CPU Power : 517.3865311741895 W
+[codecarbon INFO @ 18:57:21] 0.013776 kWh of electricity used since the beginning.
+Epoch 4 Training Loss: 0.6555
+Epoch 4 Training IoU: 0.6443
+Epoch 4 Training Dice: 0.6443
+Epoch 4 Training Accuracy: 0.9374
+Model saved to ../models/MiniUNet.pt
+Epoch 4 completed in 16.5144 seconds
+[codecarbon INFO @ 18:57:36] Energy consumed for RAM : 0.000250 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:57:36] Energy consumed for all GPUs : 0.006333 kWh. Total GPU Power : 324.3278133306864 W
+[codecarbon INFO @ 18:57:36] Energy consumed for all CPUs : 0.010746 kWh. Total CPU Power : 516.0032702386592 W
+[codecarbon INFO @ 18:57:36] 0.017330 kWh of electricity used since the beginning.
+Epoch 5 Training Loss: 0.6447
+Epoch 5 Training IoU: 0.6440
+Epoch 5 Training Dice: 0.6440
+Epoch 5 Training Accuracy: 0.9373
+Model saved to ../models/MiniUNet.pt
+Epoch 5 completed in 16.4788 seconds
+[codecarbon INFO @ 18:57:51] Energy consumed for RAM : 0.000300 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:57:51] Energy consumed for all GPUs : 0.007686 kWh. Total GPU Power : 325.2957909685561 W
+[codecarbon INFO @ 18:57:51] Energy consumed for all CPUs : 0.012897 kWh. Total CPU Power : 517.0981633109375 W
+[codecarbon INFO @ 18:57:51] 0.020883 kWh of electricity used since the beginning.
+[codecarbon INFO @ 18:58:06] Energy consumed for RAM : 0.000350 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:58:06] Energy consumed for all GPUs : 0.009036 kWh. Total GPU Power : 324.0284632143895 W
+[codecarbon INFO @ 18:58:06] Energy consumed for all CPUs : 0.015047 kWh. Total CPU Power : 516.0232417878854 W
+[codecarbon INFO @ 18:58:06] 0.024433 kWh of electricity used since the beginning.
+Epoch 6 Training Loss: 0.6262
+Epoch 6 Training IoU: 0.6440
+Epoch 6 Training Dice: 0.6440
+Epoch 6 Training Accuracy: 0.9373
+Model saved to ../models/MiniUNet.pt
+Epoch 6 completed in 16.5442 seconds
+Model saved to ../models/MiniUNet.pt
+[codecarbon INFO @ 18:58:21] Energy consumed for RAM : 0.000400 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:58:21] Energy consumed for all GPUs : 0.010391 kWh. Total GPU Power : 325.3600116001865 W
+[codecarbon INFO @ 18:58:21] Energy consumed for all CPUs : 0.017191 kWh. Total CPU Power : 514.5844583772578 W
+[codecarbon INFO @ 18:58:21] 0.027982 kWh of electricity used since the beginning.
+[codecarbon INFO @ 18:58:21] 0.089844 g.CO2eq/s mean an estimation of 2,833.3200030180456 kg.CO2eq/year
+Epoch 7 Training Loss: 0.5758
+Epoch 7 Training IoU: 0.6443
+Epoch 7 Training Dice: 0.6443
+Epoch 7 Training Accuracy: 0.9374
+Model saved to ../models/MiniUNet.pt
+Epoch 7 completed in 16.5349 seconds
+[codecarbon INFO @ 18:58:36] Energy consumed for RAM : 0.000450 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:58:36] Energy consumed for all GPUs : 0.011747 kWh. Total GPU Power : 325.5094959430657 W
+[codecarbon INFO @ 18:58:36] Energy consumed for all CPUs : 0.019372 kWh. Total CPU Power : 523.3391047076016 W
+[codecarbon INFO @ 18:58:36] 0.031568 kWh of electricity used since the beginning.
+Epoch 8 Training Loss: 0.4095
+Epoch 8 Training IoU: 0.6443
+Epoch 8 Training Dice: 0.6443
+Epoch 8 Training Accuracy: 0.9373
+Model saved to ../models/MiniUNet.pt
+Epoch 8 completed in 16.5071 seconds
+[codecarbon INFO @ 18:58:51] Energy consumed for RAM : 0.000500 kWh. RAM Power : 12.0 W
+[codecarbon INFO @ 18:58:51] Energy consumed for all GPUs : 0.013114 kWh. Total GPU Power : 328.2301412055724 W
+[codecarbon INFO @ 18:58:51] Energy consumed for all CPUs : 0.021504 kWh. Total CPU Power : 511.7669859614418 W
+[codecarbon INFO @ 18:58:51] 0.035118 kWh of electricity used since the beginning.
+Epoch 9 Training Loss: 0.2542
+Epoch 9 Training IoU: 0.6446
+Epoch 9 Training Dice: 0.6446
+Epoch 9 Training Accuracy: 0.9374
+Model saved to ../models/MiniUNet.pt
+Epoch 9 completed in 16.4434 seconds
+Model saved to ../models/MiniUNet.pt
