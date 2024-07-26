@@ -79,7 +79,14 @@ def test_model(model, device, test_loader, test_names, test_idxs, test_dims, tes
         experiment.log_metric("dice_coefficient", mean_dice_score)
         experiment.log_metric("accuracy", mean_accuracy)
         experiment.log_asset_folder(save_dir)
-
+    
+    metrics_json = {
+        'overall': {
+            'mean_iou': mean_iou_score,
+            'mean_dice': mean_dice_score,
+            'mean_accuracy': mean_accuracy
+        }
+    }
     if groupby_material:
         material_metrics_avg = {}
         for material, metrics in material_metrics.items():
@@ -102,9 +109,11 @@ def test_model(model, device, test_loader, test_names, test_idxs, test_dims, tes
                 experiment.log_metric(f"{material}_mean_iou", material_mean_iou)
                 experiment.log_metric(f"{material}_dice_coefficient", material_mean_dice)
                 experiment.log_metric(f"{material}_accuracy", material_mean_accuracy)
-
-        # Save metrics to JSON file
-        metrics_json_path = os.path.join(save_dir, 'metrics.json')
-        with open(metrics_json_path, 'w') as f:
-            json.dump(material_metrics_avg, f, indent=4)
-        print(f"Metrics saved to {metrics_json_path}")
+        
+        metrics_json['by_material'] = material_metrics_avg
+        
+    # Save metrics to JSON file
+    metrics_json_path = os.path.join(save_dir, 'metrics.json')
+    with open(metrics_json_path, 'w') as f:
+        json.dump(metrics_json, f, indent=4)
+    print(f"Metrics saved to {metrics_json_path}")

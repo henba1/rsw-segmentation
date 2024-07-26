@@ -179,17 +179,17 @@ def visual_inspect(image_tensor, mask_tensor, pred_tensor, resize_dim, save_path
             plt.imshow(pred_np, cmap='jet', alpha=0.4)
             save_image(save_path, "prediction_overlay.png")
 
-            # Ground Truth and Prediction Overlay
-            plt.imshow(image_np, cmap='gray')
-            plt.imshow(mask_np, cmap='jet', alpha=0.4)
-            plt.imshow(pred_np, cmap='jet', alpha=0.4)
-            save_image(save_path, "gt_pred_overlay.png")
-
             # Binarized Prediction
             binarized_pred = (pred_np > bin_thresh).astype(np.float32)
             plt.imshow(image_np, cmap='gray')
             plt.imshow(binarized_pred, cmap='jet', alpha=0.5)
             save_image(save_path, f"binarized_prediction_thresh={bin_thresh}.png")
+
+            # Ground Truth and Prediction Overlay
+            plt.imshow(image_np, cmap='gray')
+            plt.imshow(mask_np, cmap='jet', alpha=0.3)
+            plt.imshow(binarized_pred, cmap='spring', alpha=0.3)
+            save_image(save_path, "gt_pred_overlay.png")
     else: 
         print("visual_inspect: Please provide a save_path to save the image.")
         return

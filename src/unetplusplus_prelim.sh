@@ -13,4 +13,4 @@ module load GCC
 module load Python
 module load CUDA
 
-python main.py unetplusplus 1
+python main.py unetplusplus 1 0

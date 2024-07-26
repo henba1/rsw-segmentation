@@ -36,6 +36,7 @@ def load_model(model, directory="../models", prelim=False):
     - directory (str): The directory to load the model from.
     - prelim (bool): Flag to indicate if loading from the preliminary directory.
     """
+    
     if prelim:
         directory = os.path.join(directory, 'prelim')
     else:
@@ -103,7 +104,7 @@ def verify_predictions_and_labels(preds, labels):
 
 def get_config(model, prelim=False):
     model_type = type(model).__name__
-    config_dir = '../configs'
+    config_dir = 'configs'
     
     if prelim:
         config_dir = os.path.join(config_dir, 'prelim')
@@ -115,4 +116,4 @@ def get_config(model, prelim=False):
         config = json.load(f)
     
     del model
-    return config
+    return config, model_type

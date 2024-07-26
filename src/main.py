@@ -34,26 +34,26 @@ def main():
     # Initialize model and get config 
     if args.model_name == "deeplabv3plus":
         model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=use_pretrained)
-        config = get_config(model, prelim)
+        config, model_type = get_config(model, prelim)
         model = DeepLabV3Plus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
     elif args.model_name == "unet":
         model = UNet(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=use_pretrained)
-        config = get_config(model, prelim)
+        config, model_type  = get_config(model, prelim)
         model = UNet(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
     elif args.model_name == "unetplusplus":
         model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=use_pretrained)
-        config = get_config(model, prelim)
+        config, model_type  = get_config(model, prelim)
         model = UNetPlusPlus(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
     elif args.model_name == "segformer":
         model = SegFormer(num_labels=1, use_pretrained=use_pretrained)
-        config = get_config(model, prelim)
+        config, model_type  = get_config(model, prelim)
     elif args.model_name == "miniunet":
-        if use_pretrained:
-            print("MiniUNet is not available with a pre-trained encoder.")
-            exit(1)
-        model = MiniUNet(in_channels=1, out_channels=1)
-        config = get_config(model, prelim)
-
+        # if use_pretrained:
+        #     print("MiniUNet is not available with a pre-trained encoder.")
+        #     exit(1)
+        model = MiniUNet(in_channels=1, out_channels=1, encoder_name="resnet18", use_pretrained=use_pretrained)
+        config, model_type  = get_config(model, prelim)
+        model = MiniUNet(in_channels=1, out_channels=1, encoder_name=config["model_enc"], use_pretrained=use_pretrained)
 
     npy_path = config.get("npy_path", None)
 
@@ -94,6 +94,11 @@ def main():
 
     experiment.log_asset('../train_val_data.csv')
     experiment.log_asset('../test_data.csv')
+    if prelim:
+        experiment.log_asset(f"configs/prelim/{model_type}_config.json")
+    else:
+        experiment.log_asset(f"configs/{model_type}_config.json")
+
 
     # Shuffle the data to avoid overfitting to the order of the data (we have two distinct datasets)
     combined_data = list(zip(trainval, trainval_names, trainval_labelmasks, trainval_idxs, trainval_dims, trainval_materials))
@@ -101,9 +106,9 @@ def main():
     trainval, trainval_names, trainval_labelmasks, trainval_idxs, trainval_dims, trainval_materials = zip(*combined_data)
     
     # also shuffle the test data (for visual inspection purposes), can remove that later
-    combined_data = list(zip(test, test_names, test_labelmasks, test_idxs, test_dims, test_materials))
-    random.shuffle(combined_data)
-    test, test_names, test_labelmasks, test_idxs, test_dims, test_materials = zip(*combined_data)
+    # combined_data = list(zip(test, test_names, test_labelmasks, test_idxs, test_dims, test_materials))
+    # random.shuffle(combined_data)
+    # test, test_names, test_labelmasks, test_idxs, test_dims, test_materials = zip(*combined_data)
 
     # 2 Preprocess the data
     if config['resize_dim']:
@@ -120,7 +125,6 @@ def main():
     ])
 
     # 3 Create batches 
-
     train_batch_generator = BatchGenerator(
                             train_dataset, 
                             config["train_batch_size"], 
@@ -156,7 +160,7 @@ def main():
     model_type = type(model).__name__
 
     if config["loadModel"]:
-        model, up_to_epoch = load_model(model, prelim)
+        model, up_to_epoch = load_model(model, prelim=prelim)
         print(f"Model loaded from epoch {up_to_epoch}")
     else:
         if config['estimate_train_time']:

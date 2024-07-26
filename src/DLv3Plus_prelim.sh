@@ -13,4 +13,4 @@ module load GCC
 module load Python
 module load CUDA
 
-python main.py deeplabv3plus 1
+python main.py deeplabv3plus 1 0

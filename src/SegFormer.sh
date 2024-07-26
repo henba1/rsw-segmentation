@@ -13,4 +13,4 @@ module load GCC
 module load Python
 module load CUDA
 
-python main.py segformer 0 0
+python main.py segformer 0 1

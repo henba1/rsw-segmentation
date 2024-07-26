@@ -30,7 +30,7 @@ class PrepareData:
 
         if self.dataset == 'EUR':
             try:
-                npy_files = glob(os.path.join(self.path, "all_images_data_eur.npy"))
+                npy_files = glob(os.path.join(self.path, "all_images_data_EUR.npy"))
             except TypeError:
                 print("Error: No .npy files found in the directory: {self.path}")
                 print("Please run the DatasetCreation script with the correct raw file paths to generate the required dataset files and provide the path to the .npy files in the config.json file.")
@@ -77,10 +77,10 @@ class PrepareData:
     def get_material_properties(self, index):
         dataset_material_properties = {
             0: "2.0 mm (Boron steel) + 1.6 mm (CR5)",
-            1: "1.6 mm (CR5) + 2.0 mm (Boron steel)",
-            2: "1.6 mm (CR5) + 3.0 mm (CR300LA)",
+            1: "2.0 mm (Boron steel) + 1.6 mm (CR5)",
+            2: "3.0 mm (CR300LA) + 1.6 mm (CR5)",
             3: "3.0 mm (CR300LA) + 1.6 mm (CR5)",
-            4: "mixed including 1.6 mm (CR5) + 1.6 mm (CR5)",
+            4: "mixed including 1.6 mm (CR5)",
             5: "3.0 mm (CR300LA) + 1.6 mm (CR5)"
         }
         return dataset_material_properties.get(index, "Unknown index")

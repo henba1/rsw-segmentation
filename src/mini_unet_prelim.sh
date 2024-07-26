@@ -1,7 +1,7 @@
 #!/usr/local_rwth/bin/zsh
 
-#SBATCH --job-name=ssqc_unet
-#SBATCH --output=../cluster_printouts/prints_unet.o%J
+#SBATCH --job-name=ssqc_Prelim_mini_unet
+#SBATCH --output=../cluster_printouts/prints_Prelim_mini_unet.o%J
 #SBATCH --time=05:00:00
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
@@ -13,4 +13,4 @@ module load GCC
 module load Python
 module load CUDA
 
-python main.py unet 0 0
+python main.py miniunet 1 0
