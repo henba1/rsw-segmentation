@@ -74,3 +74,6 @@ wandb/
 *.tmp
 *.temp
 
+# Legacy/reference files (not for distribution)
+legacy_scripts/
+
