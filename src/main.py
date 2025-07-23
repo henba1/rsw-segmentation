@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import argparse
 from comet_ml import Experiment
@@ -57,14 +58,20 @@ def main():
 
     npy_path = config.get("npy_path", None)
 
-    experiment = Experiment(
-        api_key="GeoZOdwTSNAEqugIyovCVq2Kv",
-        project_name=f"{config['project_name']}{config['model_type']}",
-        workspace=config["workspace"],
-        log_env_details=True,
-        log_env_gpu=True,
-        log_env_cpu=True   
-    )
+    # Initialize Comet ML experiment with environment variable for API key
+    comet_api_key = os.getenv('COMET_API_KEY')
+    if comet_api_key:
+        experiment = Experiment(
+            api_key=comet_api_key,
+            project_name=f"{config['project_name']}{config['model_type']}",
+            workspace=config["workspace"],
+            log_env_details=True,
+            log_env_gpu=True,
+            log_env_cpu=True   
+        )
+    else:
+        print("Warning: COMET_API_KEY environment variable not set. Experiment logging disabled.")
+        experiment = None
  
     # 1 Prepare data
     prepare_data = PrepareData(dataset=config["dataset"], test_perc=config['test_perc'], n_splits=config["n_splits"], random_state=config["random_state"], local=config["local"], npy_path=npy_path)
