@@ -269,4 +269,4 @@ If you use this code in your research, please cite:
 
 ## Contact
 
-For questions about this research, please contact [hendrik.baacke@rwth-aachen.de].
+For questions about this research, please contact hendrik.baacke@rwth-aachen.de.
