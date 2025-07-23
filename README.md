@@ -260,13 +260,13 @@ If you use this code in your research, please cite:
 
 ```bibtex
 @software{rsw_segmentation,
-  title={Resistance Spot Welding Segmentation Framework},
-  author={Your Name},
+  title={Comparison of Deep Learning Architectures in Welding Ultrasonic Quality Control Using Semantic Segmentation},
+  author={Baacke, Hendrik, Behnen, Lukas and Scott, Ryan},
   year={2024},
-  url={https://github.com/yourusername/rsw-segmentation}
+  url={https://github.com/henba1/rsw-segmentation}
 }
 ```
 
 ## Contact
 
-For questions about this research or collaboration opportunities, please contact [your.email@example.com].
+For questions about this research, please contact [hendrik.baacke@rwth-aachen.de].

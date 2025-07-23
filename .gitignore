@@ -49,6 +49,8 @@ preds*/
 cluster_printouts/
 test_data.csv
 train_val_data.csv
+non_matches_Europe_Lab_Data.txt
+non_matches_lab_rsw_segmentation.txt
 
 # IDE
 .vscode/

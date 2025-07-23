@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    {name = "Hendrik Baacke", email = "hendrik.baacke@rwth-aachen.de"},
 ]
 keywords = ["deep-learning", "segmentation", "computer-vision", "welding", "pytorch"]
 classifiers = [
@@ -79,10 +79,10 @@ hpc = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/rsw-segmentation"
-Documentation = "https://github.com/yourusername/rsw-segmentation#readme"
-Repository = "https://github.com/yourusername/rsw-segmentation"
-"Bug Tracker" = "https://github.com/yourusername/rsw-segmentation/issues"
+Homepage = "https://henba1.github.io/rsw-segmentation"
+Documentation = "https://github.com/henba1/rsw-segmentation#readme"
+Repository = "https://github.com/henba1/rsw-segmentation"
+"Bug Tracker" = "https://github.com/henba1/rsw-segmentation/issues"
 
 [project.scripts]
 rsw-train = "src.main:main"
