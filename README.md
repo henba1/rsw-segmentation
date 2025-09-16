@@ -259,11 +259,15 @@ This project is licensed under the MIT License. See the LICENSE file for details
 If you use this code in your research, please cite:
 
 ```bibtex
-@software{rsw_segmentation,
-  title={Comparison of Deep Learning Architectures in Welding Ultrasonic Quality Control Using Semantic Segmentation},
-  author={Baacke, Hendrik, Behnen, Lukas and Scott, Ryan},
-  year={2024},
-  url={https://github.com/henba1/rsw-segmentation}
+@inproceedings{behnenComparisonDeepLearning2025,
+  title = {Comparison of {{Deep Learning Architectures}} in {{Ultrasonic Quality Control}} for {{Resistance Spot Welding Using Semantic Segmentation}}},
+  booktitle = {Production at the {{Leading Edge}} of {{Technology}}},
+  author = {Behnen, Lukas and Baacke, Hendrik and Keuper, Alexander and Riesener, Michael and Schuh, Günther and Scott, Ryan and Chertov, Andriy M. and Maev, Roman Gr.},
+  date = {2025},
+  pages = {301--308},
+  publisher = {Springer Nature Switzerland},
+  doi = {10.1007/978-3-031-86893-1_33},
+  url = {https://link.springer.com/10.1007/978-3-031-86893-1_33},
 }
 ```
 
