@@ -1,3 +1,5 @@
+[![pages-build-deployment](https://github.com/henba1/rsw-segmentation/actions/workflows/pages/pages-build-deployment/badge.svg?branch=main)](https://github.com/henba1/rsw-segmentation/actions/workflows/pages/pages-build-deployment)
+
 # Resistance Spot Welding Segmentation
 
 A deep learning framework for semantic segmentation of resistance spot welding (RSW) nuggets in industrial imaging applications. This project implements and compares multiple state-of-the-art segmentation architectures for automated quality control in spot welding processes.
@@ -234,21 +236,14 @@ All models are implemented using:
 - **Data augmentation** with configurable parameters
 - **Cross-validation** support for robust evaluation
 
-### Performance Optimization
+### Result Reproducability and Performance Optimization
+
+The research codebase provides several customization options to accommodate different hardware specifications while enabling optimal reproducibility of results on similar datasets. Note that the data we used is proprietary and thus cannot be disclosed.
 
 - Efficient data loading with PyTorch DataLoader
 - GPU memory optimization for large batch sizes
 - Checkpoint saving for training interruption recovery
-- Configurable batch sizes for different hardware
-
-## Contributing
-
-This research codebase follows standard software development practices:
-
-- **Code formatting**: Black and isort for consistent style
-- **Type checking**: MyPy for static analysis
-- **Testing**: pytest framework for unit tests
-- **Documentation**: Sphinx for API documentation
+- Configurable batch sizes adaptable to different hardware specifications
 
 ## License
 
@@ -273,4 +268,4 @@ If you use this code in your research, please cite:
 
 ## Contact
 
-For questions about this research, please contact hendrik.baacke@rwth-aachen.de.
+For questions, please contact hendrik.baacke@rwth-aachen.de.
